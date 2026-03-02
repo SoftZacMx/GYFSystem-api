@@ -126,5 +126,6 @@ Starts MySQL 8 with a persistent volume. Configure `DB_*` in `.env` to match.
 
 ## Documentation
 
+- **Initialization guide (AI & developers):** `docs/INITIALIZATION_GUIDE.md` — step-by-step setup, env, DB, deploy.
 - **Backend spec:** `docs/backend-creation-prompt.md` (data model, API format, auth, errors, stack).
 # GYFSystem-api
