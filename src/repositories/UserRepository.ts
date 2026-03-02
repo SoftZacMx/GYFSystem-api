@@ -18,6 +18,10 @@ export class UserRepository implements IUserRepository {
     });
   }
 
+  async count(): Promise<number> {
+    return this.dataSource.getRepository(User).count();
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.dataSource.getRepository(User).findOne({ where: { email } });
   }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createPaginationQuerySchema } from './pagination';
 
 export const createUserBodySchema = z.object({
   name: z.string().min(1, 'name is required').max(255),
@@ -17,6 +18,10 @@ export const updateUserBodySchema = z.object({
   roleId: z.coerce.number().int().positive().optional(),
   status: z.string().min(1).max(50).optional(),
 });
+
+const USER_SORTABLE_FIELDS = ['id', 'name', 'email', 'createdAt', 'updatedAt'] as const;
+export const userListQuerySchema = createPaginationQuerySchema(USER_SORTABLE_FIELDS);
+export type UserListQuery = z.infer<typeof userListQuerySchema>;
 
 export type CreateUserBody = z.infer<typeof createUserBodySchema>;
 export type UpdateUserBody = z.infer<typeof updateUserBodySchema>;

@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { UserService } from '../services/UserService';
 import { createAppError } from '../middlewares/global-error-handler';
-import { success } from '../views';
-import { createUserBodySchema, updateUserBodySchema } from '../validators/user';
+import { success, successList, listMeta } from '../views';
+import { createUserBodySchema, updateUserBodySchema, userListQuerySchema } from '../validators/user';
 
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -23,13 +23,15 @@ export class UserController {
   }
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const parsed = userListQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      next(parsed.error);
+      return;
+    }
     try {
-      const skip = req.query.skip != null ? Number(req.query.skip) : undefined;
-      const take = req.query.take != null ? Number(req.query.take) : undefined;
-      const data = await this.userService.findAll(
-        [skip, take].every(Number.isInteger) ? { skip, take } : undefined
-      );
-      success(res, data, undefined, 200);
+      const { page, limit } = parsed.data;
+      const { data, total } = await this.userService.findAllPaginated({ page, limit });
+      successList(res, data, listMeta(page, limit, total));
     } catch (err) {
       next(err);
     }

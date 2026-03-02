@@ -59,6 +59,15 @@ export class UserService {
     return list.map(toDto);
   }
 
+  async findAllPaginated(options: { page: number; limit: number }): Promise<{ data: UserDto[]; total: number }> {
+    const skip = (options.page - 1) * options.limit;
+    const [data, total] = await Promise.all([
+      this.userRepository.findAll({ skip, take: options.limit }),
+      this.userRepository.count(),
+    ]);
+    return { data: data.map(toDto), total };
+  }
+
   async findById(id: number): Promise<UserDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {

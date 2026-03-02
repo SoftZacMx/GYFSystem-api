@@ -53,10 +53,11 @@ app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json());
 app.use(requestLogger);
+const isDev = env.NODE_ENV !== 'production';
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: isDev ? 500 : 100,
     standardHeaders: true,
     legacyHeaders: false,
   })
