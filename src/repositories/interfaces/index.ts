@@ -1,0 +1,11 @@
+export type { IUserRepository, FindAllOptions as UserFindAllOptions } from './IUserRepository';
+export type { IRoleRepository } from './IRoleRepository';
+export type { IUserTypeRepository } from './IUserTypeRepository';
+export type { IStudentRepository, StudentFindAllOptions } from './IStudentRepository';
+export type { IParentStudentRepository } from './IParentStudentRepository';
+export type { IDocumentCategoryRepository } from './IDocumentCategoryRepository';
+export type { IDocumentRepository, DocumentFindAllOptions } from './IDocumentRepository';
+export type { IEventRepository, EventFindAllOptions } from './IEventRepository';
+export type { INotificationRepository, NotificationFindAllOptions } from './INotificationRepository';
+export type { IAuditLogRepository, AuditLogFindAllOptions } from './IAuditLogRepository';
+export type { ICompanyRepository } from './ICompanyRepository';
