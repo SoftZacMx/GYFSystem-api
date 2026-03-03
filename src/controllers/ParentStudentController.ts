@@ -21,7 +21,7 @@ export class ParentStudentController {
     if (!parsed.success) { next(parsed.error); return; }
     try {
       await this.parentStudentService.disassociate(parsed.data.userId, parsed.data.studentId);
-      res.status(204).send();
+      success(res, null, undefined, 200);
     } catch (err) { next(err); }
   }
 

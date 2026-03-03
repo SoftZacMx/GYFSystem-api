@@ -102,7 +102,7 @@ export class DocumentController {
     try {
       const ip = req.ip ?? req.socket.remoteAddress;
       await this.documentService.softDelete(id, req.user?.sub, ip ?? undefined);
-      res.status(204).send();
+      success(res, null, undefined, 200);
     } catch (err) { next(err); }
   }
 

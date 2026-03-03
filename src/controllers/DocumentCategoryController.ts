@@ -48,7 +48,7 @@ export class DocumentCategoryController {
     if (Number.isNaN(id) || id < 1) { next(createAppError('Invalid id', 'BAD_REQUEST')); return; }
     try {
       await this.categoryService.delete(id);
-      res.status(204).send();
+      success(res, null, undefined, 200);
     } catch (err) { next(err); }
   }
 }
