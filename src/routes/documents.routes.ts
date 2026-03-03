@@ -8,6 +8,10 @@ export function registerDocumentRoutes(app: Express, controller: DocumentControl
     controller.list(req, res, next).catch(next);
   });
 
+  app.get('/documents/me/grouped', authMiddleware, (req: Request, res: Response, next: NextFunction) => {
+    controller.listGroupedByMyStudents(req, res, next).catch(next);
+  });
+
   app.get('/documents/:id/verify', (req: Request, res: Response, next: NextFunction) => {
     controller.verifySignature(req, res, next).catch(next);
   });

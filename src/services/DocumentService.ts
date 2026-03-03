@@ -124,6 +124,12 @@ export class DocumentService {
     return { data: data.map(toDto), total };
   }
 
+  async findDocumentsByStudentIds(studentIds: number[]): Promise<DocumentDto[]> {
+    if (studentIds.length === 0) return [];
+    const list = await this.documentRepository.findAllByStudentIds(studentIds);
+    return list.map(toDto);
+  }
+
   async findById(id: number): Promise<DocumentDto> {
     const document = await this.documentRepository.findById(id);
     if (!document) {

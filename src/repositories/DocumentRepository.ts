@@ -1,4 +1,4 @@
-import { DataSource, type FindOptionsWhere } from 'typeorm';
+import { DataSource, In, type FindOptionsWhere } from 'typeorm';
 import { Document } from '../entities';
 import type { IDocumentRepository, DocumentFindAllOptions } from './interfaces/IDocumentRepository';
 
@@ -28,6 +28,34 @@ export class DocumentRepository implements IDocumentRepository {
       take: options?.take,
       order: { [sortField]: sortOrder },
     });
+  }
+
+  async findAllByStudentIds(studentIds: number[]): Promise<Document[]> {
+    if (studentIds.length === 0) return [];
+    return this.repo.find({
+      where: { studentId: In(studentIds) },
+      order: { uploadedAt: 'DESC' },
+    });
+  }
+
+  async findStudentCategoryPairs(): Promise<{ studentId: number; categoryId: number }[]> {
+    const rows = await this.repo
+      .createQueryBuilder('d')
+      .select('d.student_id', 'studentId')
+      .addSelect('d.category_id', 'categoryId')
+      .distinct(true)
+      .getRawMany<{ studentId: number; categoryId: number }>();
+    return rows;
+  }
+
+  async findCategoryIdsByStudentId(studentId: number): Promise<number[]> {
+    const rows = await this.repo
+      .createQueryBuilder('d')
+      .select('d.category_id', 'categoryId')
+      .where('d.student_id = :studentId', { studentId })
+      .distinct(true)
+      .getRawMany<{ categoryId: number }>();
+    return rows.map((r) => r.categoryId);
   }
 
   async count(filters?: { studentId?: number; categoryId?: number }): Promise<number> {

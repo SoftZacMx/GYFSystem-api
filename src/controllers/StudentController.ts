@@ -1,11 +1,38 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { StudentService } from '../services/StudentService';
+import type { ParentStudentService } from '../services/ParentStudentService';
+import type { StudentDto } from '../services/StudentService';
 import { createAppError } from '../middlewares/global-error-handler';
 import { success, successList, listMeta } from '../views';
 import { createStudentBodySchema, updateStudentBodySchema, studentQuerySchema } from '../validators/student';
 
 export class StudentController {
-  constructor(private readonly studentService: StudentService) {}
+  constructor(
+    private readonly studentService: StudentService,
+    private readonly parentStudentService?: ParentStudentService,
+  ) {}
+
+  async listMyStudents(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const userId = req.user?.sub != null ? Number(req.user.sub) : NaN;
+    if (Number.isNaN(userId) || userId < 1) {
+      next(createAppError('Unauthorized', 'UNAUTHORIZED'));
+      return;
+    }
+    if (!this.parentStudentService) {
+      next(createAppError('Not available', 'INTERNAL_ERROR'));
+      return;
+    }
+    try {
+      const list = await this.parentStudentService.findStudentsByUserId(userId);
+      const ids = list.map((s) => s.studentId);
+      const dtos = await this.studentService.findByIds(ids);
+      const byId = new Map(dtos.map((d) => [d.id, d]));
+      const data = ids.map((id) => byId.get(id)).filter((d): d is StudentDto => d != null);
+      success(res, data);
+    } catch (err) {
+      next(err);
+    }
+  }
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     const parsed = createStudentBodySchema.safeParse(req.body);

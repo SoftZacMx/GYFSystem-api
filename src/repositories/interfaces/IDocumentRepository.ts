@@ -13,6 +13,9 @@ export interface IDocumentRepository {
   findById(id: number): Promise<Document | null>;
   findByStudentIdAndCategoryId(studentId: number, categoryId: number): Promise<Document | null>;
   findAll(options?: DocumentFindAllOptions): Promise<Document[]>;
+  findAllByStudentIds(studentIds: number[]): Promise<Document[]>;
+  findStudentCategoryPairs(): Promise<{ studentId: number; categoryId: number }[]>;
+  findCategoryIdsByStudentId(studentId: number): Promise<number[]>;
   count(filters?: { studentId?: number; categoryId?: number }): Promise<number>;
   save(document: Partial<Document>): Promise<Document>;
   softDelete(id: number): Promise<void>;

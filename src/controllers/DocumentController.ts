@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { DocumentService } from '../services/DocumentService';
+import type { ParentStudentService } from '../services/ParentStudentService';
 import QRCode from 'qrcode';
 import { createAppError } from '../middlewares/global-error-handler';
 import { success, successList, listMeta } from '../views';
@@ -10,6 +11,7 @@ export class DocumentController {
   constructor(
     private readonly documentService: DocumentService,
     private readonly appUrl: string,
+    private readonly parentStudentService: ParentStudentService,
   ) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -33,6 +35,33 @@ export class DocumentController {
     try {
       const { data, total } = await this.documentService.findAll({ page, limit, sortBy, order, studentId, categoryId });
       successList(res, data, listMeta(page, limit, total));
+    } catch (err) { next(err); }
+  }
+
+  async listGroupedByMyStudents(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const userId = req.user?.sub;
+    if (!userId) { next(createAppError('Authentication required', 'UNAUTHORIZED')); return; }
+    try {
+      const students = await this.parentStudentService.findStudentsByUserId(userId);
+      const studentIds = students.map((s) => s.studentId);
+      const documents = await this.documentService.findDocumentsByStudentIds(studentIds);
+      const byStudent = new Map<number, typeof documents>();
+      for (const doc of documents) {
+        const list = byStudent.get(doc.studentId) ?? [];
+        list.push(doc);
+        byStudent.set(doc.studentId, list);
+      }
+      const groups = students.map((student) => ({
+        student: {
+          studentId: student.studentId,
+          fullName: student.fullName,
+          curp: student.curp,
+          grade: student.grade,
+          status: student.status,
+        },
+        documents: byStudent.get(student.studentId) ?? [],
+      }));
+      success(res, { groups });
     } catch (err) { next(err); }
   }
 

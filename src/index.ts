@@ -19,6 +19,7 @@ import { registerDocumentRoutes } from './routes/documents.routes';
 import { registerEventRoutes } from './routes/events.routes';
 import { registerNotificationRoutes } from './routes/notifications.routes';
 import { registerCompanyRoutes } from './routes/company.routes';
+import { registerDashboardRoutes } from './routes/dashboard.routes';
 import { AuthService } from './services/AuthService';
 import { UserTypeService } from './services/UserTypeService';
 import { RoleService } from './services/RoleService';
@@ -45,6 +46,8 @@ import { AuditService } from './services/AuditService';
 import { SignatureService } from './services/SignatureService';
 import { CompanyService } from './services/CompanyService';
 import { CompanyController } from './controllers/CompanyController';
+import { DashboardService } from './services/DashboardService';
+import { DashboardController } from './controllers/DashboardController';
 import { globalErrorHandler, createAppError } from './middlewares/global-error-handler';
 
 const app = express();
@@ -110,13 +113,18 @@ const userService = new UserService(userRepository, auditService);
 const userController = new UserController(userService, authService);
 registerUserRoutes(app, userController);
 
-const studentService = new StudentService(studentRepository, auditService);
-const studentController = new StudentController(studentService);
-registerStudentRoutes(app, studentController);
-
 const parentStudentService = new ParentStudentService(parentStudentRepository, userRepository, studentRepository);
 const parentStudentController = new ParentStudentController(parentStudentService);
 registerParentStudentRoutes(app, parentStudentController);
+
+const studentService = new StudentService(
+  studentRepository,
+  documentCategoryRepository,
+  documentRepository,
+  auditService
+);
+const studentController = new StudentController(studentService, parentStudentService);
+registerStudentRoutes(app, studentController);
 
 const documentCategoryService = new DocumentCategoryService(documentCategoryRepository);
 const documentCategoryController = new DocumentCategoryController(documentCategoryService);
@@ -125,7 +133,7 @@ registerDocumentCategoryRoutes(app, documentCategoryController);
 const storageService = new StorageService(s3Client, s3Bucket, env.S3_REGION, env.S3_ENDPOINT);
 const signatureService = new SignatureService(env.SIGNATURE_PRIVATE_KEY_PATH, env.SIGNATURE_PUBLIC_KEY_PATH);
 const documentService = new DocumentService(documentRepository, studentRepository, documentCategoryRepository, storageService, auditService, signatureService, env.APP_URL);
-const documentController = new DocumentController(documentService, env.APP_URL);
+const documentController = new DocumentController(documentService, env.APP_URL, parentStudentService);
 registerDocumentRoutes(app, documentController);
 
 const eventService = new EventService(eventRepository, notificationRepository, userRepository, mailService, auditService);
@@ -139,6 +147,16 @@ registerNotificationRoutes(app, notificationController);
 const companyService = new CompanyService(companyRepository);
 const companyController = new CompanyController(companyService);
 registerCompanyRoutes(app, companyController);
+
+const dashboardService = new DashboardService(
+  studentRepository,
+  userRepository,
+  eventRepository,
+  documentRepository,
+  documentCategoryRepository
+);
+const dashboardController = new DashboardController(dashboardService);
+registerDashboardRoutes(app, dashboardController);
 
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(createAppError('Resource or route not found', 'NOT_FOUND'));

@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { In } from 'typeorm';
 import { Student } from '../entities';
 import type { IStudentRepository, StudentFindAllOptions } from './interfaces/IStudentRepository';
 
@@ -11,6 +12,11 @@ export class StudentRepository implements IStudentRepository {
 
   async findById(id: number): Promise<Student | null> {
     return this.repo.findOne({ where: { id } });
+  }
+
+  async findByIds(ids: number[]): Promise<Student[]> {
+    if (ids.length === 0) return [];
+    return this.repo.find({ where: { id: In(ids) } });
   }
 
   async findAll(options?: StudentFindAllOptions): Promise<Student[]> {

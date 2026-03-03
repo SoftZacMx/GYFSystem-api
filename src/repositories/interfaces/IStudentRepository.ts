@@ -9,6 +9,7 @@ export interface StudentFindAllOptions {
 
 export interface IStudentRepository {
   findById(id: number): Promise<Student | null>;
+  findByIds(ids: number[]): Promise<Student[]>;
   findAll(options?: StudentFindAllOptions): Promise<Student[]>;
   count(): Promise<number>;
   findByCurp(curp: string): Promise<Student | null>;
