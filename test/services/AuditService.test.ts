@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { AuditService } from './AuditService';
-import type { IAuditLogRepository } from '../repositories/interfaces/IAuditLogRepository';
+import { AuditService } from '@/services/AuditService';
+import type { IAuditLogRepository } from '@/repositories/interfaces/IAuditLogRepository';
 
 describe('AuditService', () => {
   it('log saves entry to repository', async () => {

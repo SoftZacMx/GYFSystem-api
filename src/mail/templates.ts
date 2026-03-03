@@ -83,3 +83,102 @@ export function notificationEmailHtml(data: NotificationEmailData): string {
 export function notificationEmailText(data: NotificationEmailData): string {
   return `Hola ${data.recipientName},\n\nTienes una nueva notificación [${data.type}]:\n\n${data.message}\n\n— Files Manager`;
 }
+
+// --- Account verification templates ---
+
+export interface VerificationEmailData {
+  recipientName: string;
+  verificationUrl: string;
+}
+
+export function verificationEmailSubject(_data: VerificationEmailData): string {
+  return 'Verify your account — Files Manager';
+}
+
+export function verificationEmailHtml(data: VerificationEmailData): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+          <tr>
+            <td style="background:#1a73e8;padding:20px 24px;">
+              <h1 style="margin:0;color:#fff;font-size:20px;">Files Manager</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <p style="margin:0 0 8px;color:#333;">Hello <strong>${escapeHtml(data.recipientName)}</strong>,</p>
+              <p style="margin:0 0 16px;color:#555;">Please verify your account by clicking the link below. This link expires in 1 hour.</p>
+              <p style="margin:0 0 16px;"><a href="${escapeHtml(data.verificationUrl)}" style="display:inline-block;background:#1a73e8;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;">Verify account</a></p>
+              <p style="margin:0;color:#999;font-size:12px;">If you did not create an account, you can ignore this email.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#f4f4f7;padding:16px 24px;text-align:center;">
+              <p style="margin:0;color:#aaa;font-size:11px;">This email was sent automatically by Files Manager.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
+}
+
+export function verificationEmailText(data: VerificationEmailData): string {
+  return `Hello ${data.recipientName},\n\nPlease verify your account by visiting this link (expires in 1 hour):\n\n${data.verificationUrl}\n\nIf you did not create an account, you can ignore this email.\n\n— Files Manager`;
+}
+
+// --- Account activated confirmation ---
+
+export interface AccountActivatedEmailData {
+  recipientName: string;
+}
+
+export function accountActivatedEmailSubject(_data: AccountActivatedEmailData): string {
+  return 'Account activated — Files Manager';
+}
+
+export function accountActivatedEmailHtml(data: AccountActivatedEmailData): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+          <tr>
+            <td style="background:#2ecc71;padding:20px 24px;">
+              <h1 style="margin:0;color:#fff;font-size:20px;">Files Manager</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <p style="margin:0 0 8px;color:#333;">Hello <strong>${escapeHtml(data.recipientName)}</strong>,</p>
+              <p style="margin:0 0 16px;color:#555;">Your account has been successfully activated. You can now sign in with your email and password.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#f4f4f7;padding:16px 24px;text-align:center;">
+              <p style="margin:0;color:#aaa;font-size:11px;">This email was sent automatically by Files Manager.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
+}
+
+export function accountActivatedEmailText(data: AccountActivatedEmailData): string {
+  return `Hello ${data.recipientName},\n\nYour account has been successfully activated. You can now sign in with your email and password.\n\n— Files Manager`;
+}

@@ -39,6 +39,12 @@ export class User {
   @Column({ type: 'varchar', length: 50 })
   status: string;
 
+  @Column({ name: 'is_account_activated', type: 'boolean', default: false })
+  isAccountActivated: boolean;
+
+  @Column({ name: 'email_verified_at', type: 'datetime', nullable: true })
+  emailVerifiedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

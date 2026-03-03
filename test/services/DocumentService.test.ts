@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DocumentService } from './DocumentService';
-import type { IDocumentRepository } from '../repositories/interfaces/IDocumentRepository';
-import type { IStudentRepository } from '../repositories/interfaces/IStudentRepository';
-import type { IDocumentCategoryRepository } from '../repositories/interfaces/IDocumentCategoryRepository';
-import type { StorageService } from './StorageService';
-import type { SignatureService } from './SignatureService';
-import type { AuditService } from './AuditService';
+import { DocumentService } from '@/services/DocumentService';
+import type { IDocumentRepository } from '@/repositories/interfaces/IDocumentRepository';
+import type { IStudentRepository } from '@/repositories/interfaces/IStudentRepository';
+import type { IDocumentCategoryRepository } from '@/repositories/interfaces/IDocumentCategoryRepository';
+import type { StorageService } from '@/services/StorageService';
+import type { SignatureService } from '@/services/SignatureService';
+import type { AuditService } from '@/services/AuditService';
 
 function doc(overrides: Record<string, unknown> = {}) {
   return {

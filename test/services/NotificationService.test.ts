@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { NotificationService } from './NotificationService';
-import type { INotificationRepository } from '../repositories/interfaces/INotificationRepository';
-import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
-import type { MailService } from '../mail';
+import { NotificationService } from '@/services/NotificationService';
+import type { INotificationRepository } from '@/repositories/interfaces/INotificationRepository';
+import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
+import type { MailService } from '@/mail';
 
 function notification(overrides: Record<string, unknown> = {}) {
   return {
@@ -26,6 +26,7 @@ describe('NotificationService', () => {
       findById: vi.fn().mockResolvedValue({ id: 1, name: 'User', email: 'u@x.com' }),
       findByEmail: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -52,6 +53,7 @@ describe('NotificationService', () => {
       findById: vi.fn().mockResolvedValue(null),
       findByEmail: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -80,7 +82,7 @@ describe('NotificationService', () => {
       markAllAsReadByUser: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new NotificationService(notificationRepo, userRepo as any, mailService);
     const result = await service.findById(1);
     expect(result).toMatchObject({ id: 1, message: 'Hello' });
@@ -96,7 +98,7 @@ describe('NotificationService', () => {
       markAllAsReadByUser: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new NotificationService(notificationRepo, userRepo as any, mailService);
     await expect(service.findById(999)).rejects.toMatchObject({
       message: 'Notification not found',
@@ -114,7 +116,7 @@ describe('NotificationService', () => {
       markAllAsReadByUser: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new NotificationService(notificationRepo, userRepo as any, mailService);
     const result = await service.markAsRead(1);
     expect(result.isRead).toBe(true);
@@ -131,7 +133,7 @@ describe('NotificationService', () => {
       markAsRead: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new NotificationService(notificationRepo, userRepo as any, mailService);
     const result = await service.markAllAsReadByUser(1);
     expect(result).toEqual({ updated: 5 });
@@ -147,7 +149,7 @@ describe('NotificationService', () => {
       markAllAsReadByUser: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new NotificationService(notificationRepo, userRepo as any, mailService);
     await expect(service.delete(999)).rejects.toMatchObject({
       message: 'Notification not found',

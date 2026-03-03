@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { EventService } from './EventService';
-import type { IEventRepository } from '../repositories/interfaces/IEventRepository';
-import type { INotificationRepository } from '../repositories/interfaces/INotificationRepository';
-import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
-import type { MailService } from '../mail';
-import type { AuditService } from './AuditService';
+import { EventService } from '@/services/EventService';
+import type { IEventRepository } from '@/repositories/interfaces/IEventRepository';
+import type { INotificationRepository } from '@/repositories/interfaces/INotificationRepository';
+import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
+import type { MailService } from '@/mail';
+import type { AuditService } from '@/services/AuditService';
 
 function event(overrides: Record<string, unknown> = {}) {
   return {
@@ -43,6 +43,7 @@ describe('EventService', () => {
       findAll: vi.fn().mockResolvedValue([]),
       findById: vi.fn(),
       findByEmail: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -72,7 +73,7 @@ describe('EventService', () => {
       delete: vi.fn(),
     };
     const notificationRepo = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), count: vi.fn(), markAsRead: vi.fn(), markAllAsReadByUser: vi.fn(), delete: vi.fn() };
-    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new EventService(
       eventRepo,
       notificationRepo as any,
@@ -93,7 +94,7 @@ describe('EventService', () => {
       delete: vi.fn(),
     };
     const notificationRepo = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), count: vi.fn(), markAsRead: vi.fn(), markAllAsReadByUser: vi.fn(), delete: vi.fn() };
-    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new EventService(
       eventRepo,
       notificationRepo as any,
@@ -116,7 +117,7 @@ describe('EventService', () => {
       delete: vi.fn(),
     };
     const notificationRepo = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), count: vi.fn(), markAsRead: vi.fn(), markAllAsReadByUser: vi.fn(), delete: vi.fn() };
-    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new EventService(
       eventRepo,
       notificationRepo as any,
@@ -138,7 +139,7 @@ describe('EventService', () => {
       delete: vi.fn(),
     };
     const notificationRepo = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), count: vi.fn(), markAsRead: vi.fn(), markAllAsReadByUser: vi.fn(), delete: vi.fn() };
-    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new EventService(
       eventRepo,
       notificationRepo as any,
@@ -161,7 +162,7 @@ describe('EventService', () => {
       count: vi.fn(),
     };
     const notificationRepo = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), count: vi.fn(), markAsRead: vi.fn(), markAllAsReadByUser: vi.fn(), delete: vi.fn() };
-    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findAll: vi.fn(), findById: vi.fn(), findByEmail: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new EventService(
       eventRepo,
       notificationRepo as any,

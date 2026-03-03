@@ -6,3 +6,9 @@ export const loginBodySchema = z.object({
 });
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
+
+export const verifyAccountQuerySchema = z.object({
+  token: z.string().min(1, 'token is required'),
+});
+
+export type VerifyAccountQuery = z.infer<typeof verifyAccountQuerySchema>;

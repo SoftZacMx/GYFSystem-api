@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { CompanyService } from './CompanyService';
-import type { ICompanyRepository } from '../repositories/interfaces/ICompanyRepository';
-import type { Company } from '../entities';
+import { CompanyService } from '@/services/CompanyService';
+import type { ICompanyRepository } from '@/repositories/interfaces/ICompanyRepository';
+import type { Company } from '@/entities';
 
 function company(overrides: Partial<Company> = {}): Company {
   return {

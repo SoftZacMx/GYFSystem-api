@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { StudentService } from './StudentService';
-import type { IStudentRepository } from '../repositories/interfaces/IStudentRepository';
-import type { AuditService } from './AuditService';
+import { StudentService } from '@/services/StudentService';
+import type { IStudentRepository } from '@/repositories/interfaces/IStudentRepository';
+import type { AuditService } from '@/services/AuditService';
 
 function student(overrides: Record<string, unknown> = {}) {
   return {

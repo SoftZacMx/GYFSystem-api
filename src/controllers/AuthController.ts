@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import type { AuthService } from '../services/AuthService';
 import { success } from '../views';
 import { loginBodySchema } from '../validators';
+import type { VerifyAccountQuery } from '../validators';
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -33,5 +34,23 @@ export class AuthController {
       return;
     }
     success(res, req.user, undefined, 200);
+  }
+
+  /**
+   * Verifies account using the token from the verification email link.
+   * Token is validated via validateQuery(verifyAccountQuerySchema); use req.validatedQuery.
+   */
+  async verifyAccount(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const query = req.validatedQuery as VerifyAccountQuery | undefined;
+    if (!query?.token) {
+      next(new Error('Token is required'));
+      return;
+    }
+    try {
+      await this.authService.verifyAccount(query.token);
+      success(res, { message: 'Account verified successfully' }, undefined, 200);
+    } catch (err) {
+      next(err);
+    }
   }
 }

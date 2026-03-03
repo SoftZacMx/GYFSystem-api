@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { RoleService } from './RoleService';
-import type { IRoleRepository } from '../repositories/interfaces/IRoleRepository';
+import { RoleService } from '@/services/RoleService';
+import type { IRoleRepository } from '@/repositories/interfaces/IRoleRepository';
 
 describe('RoleService', () => {
   it('findAll returns list of { id, name }', async () => {
@@ -10,6 +10,7 @@ describe('RoleService', () => {
         { id: 2, name: 'Teacher' },
       ]),
       findById: vi.fn(),
+      save: vi.fn(),
     };
     const service = new RoleService(repo);
     const result = await service.findAll();
@@ -20,6 +21,7 @@ describe('RoleService', () => {
     const repo: IRoleRepository = {
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue({ id: 1, name: 'Admin' }),
+      save: vi.fn(),
     };
     const service = new RoleService(repo);
     const result = await service.findById(1);
@@ -30,6 +32,7 @@ describe('RoleService', () => {
     const repo: IRoleRepository = {
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue(null),
+      save: vi.fn(),
     };
     const service = new RoleService(repo);
     await expect(service.findById(999)).rejects.toMatchObject({

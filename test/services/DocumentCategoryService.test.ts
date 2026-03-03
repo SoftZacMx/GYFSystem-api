@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DocumentCategoryService } from './DocumentCategoryService';
-import type { IDocumentCategoryRepository } from '../repositories/interfaces/IDocumentCategoryRepository';
+import { DocumentCategoryService } from '@/services/DocumentCategoryService';
+import type { IDocumentCategoryRepository } from '@/repositories/interfaces/IDocumentCategoryRepository';
 
 function category(overrides: Record<string, unknown> = {}) {
   return {

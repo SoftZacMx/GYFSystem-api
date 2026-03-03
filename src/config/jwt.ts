@@ -40,3 +40,44 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
     exp: payload.exp,
   };
 }
+
+// --- Account verification token (1 hour, purpose: account_verify) ---
+
+export interface VerificationTokenPayload {
+  userId: number;
+  email: string;
+  purpose: 'account_verify';
+  iat?: number;
+  exp?: number;
+}
+
+const VERIFICATION_TOKEN_EXPIRES_IN_SECONDS = 3600; // 1 hour
+
+/**
+ * Signs a JWT for account verification. Payload: userId, email, purpose: 'account_verify'. Expires in 1 hour.
+ */
+export function signVerificationToken(userId: number, email: string): string {
+  return jwt.sign(
+    { userId, email, purpose: 'account_verify' as const },
+    env.JWT_SECRET,
+    { expiresIn: VERIFICATION_TOKEN_EXPIRES_IN_SECONDS }
+  );
+}
+
+/**
+ * Verifies the verification token. Returns the decoded payload or throws.
+ */
+export function verifyVerificationToken(token: string): VerificationTokenPayload {
+  const decoded = jwt.verify(token, env.JWT_SECRET);
+  if (typeof decoded !== 'object' || decoded === null || !('userId' in decoded) || (decoded as { purpose?: string }).purpose !== 'account_verify') {
+    throw new Error('Invalid verification token');
+  }
+  const payload = decoded as jwt.JwtPayload & VerificationTokenPayload;
+  return {
+    userId: payload.userId as number,
+    email: payload.email as string,
+    purpose: 'account_verify',
+    iat: payload.iat,
+    exp: payload.exp,
+  };
+}

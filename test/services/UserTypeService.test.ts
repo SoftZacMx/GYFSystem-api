@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { UserTypeService } from './UserTypeService';
-import type { IUserTypeRepository } from '../repositories/interfaces/IUserTypeRepository';
+import { UserTypeService } from '@/services/UserTypeService';
+import type { IUserTypeRepository } from '@/repositories/interfaces/IUserTypeRepository';
 
 describe('UserTypeService', () => {
   it('findAll returns list of { id, name }', async () => {
@@ -10,6 +10,7 @@ describe('UserTypeService', () => {
         { id: 2, name: 'Teacher' },
       ]),
       findById: vi.fn(),
+      save: vi.fn(),
     };
     const service = new UserTypeService(repo);
     const result = await service.findAll();
@@ -20,6 +21,7 @@ describe('UserTypeService', () => {
     const repo: IUserTypeRepository = {
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue({ id: 1, name: 'Admin' }),
+      save: vi.fn(),
     };
     const service = new UserTypeService(repo);
     const result = await service.findById(1);
@@ -30,6 +32,7 @@ describe('UserTypeService', () => {
     const repo: IUserTypeRepository = {
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue(null),
+      save: vi.fn(),
     };
     const service = new UserTypeService(repo);
     await expect(service.findById(999)).rejects.toMatchObject({

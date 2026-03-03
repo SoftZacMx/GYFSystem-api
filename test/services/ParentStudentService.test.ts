@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ParentStudentService } from './ParentStudentService';
-import type { IParentStudentRepository } from '../repositories/interfaces/IParentStudentRepository';
-import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
-import type { IStudentRepository } from '../repositories/interfaces/IStudentRepository';
+import { ParentStudentService } from '@/services/ParentStudentService';
+import type { IParentStudentRepository } from '@/repositories/interfaces/IParentStudentRepository';
+import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
+import type { IStudentRepository } from '@/repositories/interfaces/IStudentRepository';
 
 describe('ParentStudentService', () => {
   it('associate creates link when user and student exist', async () => {
@@ -10,6 +10,7 @@ describe('ParentStudentService', () => {
       findById: vi.fn().mockResolvedValue({ id: 1, name: 'Parent', email: 'p@x.com' }),
       findByEmail: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -39,6 +40,7 @@ describe('ParentStudentService', () => {
       findById: vi.fn().mockResolvedValue(null),
       findByEmail: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -69,6 +71,7 @@ describe('ParentStudentService', () => {
       findById: vi.fn().mockResolvedValue({ id: 1 }),
       findByEmail: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -102,7 +105,7 @@ describe('ParentStudentService', () => {
       findByStudentId: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const studentRepo = { findById: vi.fn(), findByCurp: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new ParentStudentService(parentStudentRepo, userRepo as any, studentRepo as any);
     await expect(service.disassociate(1, 10)).rejects.toMatchObject({
@@ -116,6 +119,7 @@ describe('ParentStudentService', () => {
       findById: vi.fn().mockResolvedValue({ id: 1 }),
       findByEmail: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };
@@ -155,7 +159,7 @@ describe('ParentStudentService', () => {
       findByUserId: vi.fn(),
       delete: vi.fn(),
     };
-    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), save: vi.fn(), delete: vi.fn() };
+    const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
     const service = new ParentStudentService(parentStudentRepo, userRepo as any, studentRepo);
     const result = await service.findParentsByStudentId(10);
     expect(result).toHaveLength(1);

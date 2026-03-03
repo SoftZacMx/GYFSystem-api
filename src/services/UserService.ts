@@ -49,6 +49,7 @@ export class UserService {
       userTypeId: body.userTypeId,
       roleId: body.roleId,
       status: body.status,
+      isAccountActivated: false,
     });
     this.auditService.log({ userId: performedBy, action: 'CREATE', entityType: 'user', entityId: user.id, ip });
     return toDto(user);

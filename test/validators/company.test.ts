@@ -3,7 +3,7 @@ import {
   companyIdQuerySchema,
   createCompanyBodySchema,
   updateCompanyBodySchema,
-} from './company';
+} from '@/validators/company';
 
 describe('companyIdQuerySchema', () => {
   it('accepts positive integer id', () => {

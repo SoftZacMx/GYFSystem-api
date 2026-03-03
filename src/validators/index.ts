@@ -5,7 +5,7 @@ export {
   type PaginationQueryInput,
 } from './pagination';
 
-export { loginBodySchema, type LoginBody } from './auth';
+export { loginBodySchema, verifyAccountQuerySchema, type LoginBody, type VerifyAccountQuery } from './auth';
 
 export {
   createUserBodySchema,

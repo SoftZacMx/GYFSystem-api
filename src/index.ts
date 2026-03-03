@@ -94,7 +94,7 @@ const { userRepository, userTypeRepository, roleRepository, studentRepository, p
 
 const auditService = new AuditService(auditLogRepository);
 
-const authService = new AuthService(userRepository, auditService);
+const authService = new AuthService(userRepository, auditService, mailService);
 const authController = new AuthController(authService);
 registerAuthRoutes(app, authController);
 
@@ -107,7 +107,7 @@ const roleController = new RoleController(roleService);
 registerRoleRoutes(app, roleController);
 
 const userService = new UserService(userRepository, auditService);
-const userController = new UserController(userService);
+const userController = new UserController(userService, authService);
 registerUserRoutes(app, userController);
 
 const studentService = new StudentService(studentRepository, auditService);

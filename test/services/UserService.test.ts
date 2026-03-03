@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { UserService } from './UserService';
-import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
-import type { AuditService } from './AuditService';
+import { UserService } from '@/services/UserService';
+import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
+import type { AuditService } from '@/services/AuditService';
 
 vi.mock('bcrypt', () => ({
   default: {
@@ -35,6 +35,7 @@ describe('UserService', () => {
       findByEmail: vi.fn(),
       findById: vi.fn(),
       findAll: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
       save: vi.fn(),
       delete: vi.fn(),
     };

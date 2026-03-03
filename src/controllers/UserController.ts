@@ -1,11 +1,16 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { UserService } from '../services/UserService';
+import type { AuthService } from '../services/AuthService';
 import { createAppError } from '../middlewares/global-error-handler';
 import { success, successList, listMeta } from '../views';
 import { createUserBodySchema, updateUserBodySchema, userListQuerySchema } from '../validators/user';
+import { logger } from '../config';
 
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     const parsed = createUserBodySchema.safeParse(req.body);
@@ -16,6 +21,11 @@ export class UserController {
     try {
       const ip = req.ip ?? req.socket.remoteAddress;
       const data = await this.userService.create(parsed.data, req.user?.sub, ip ?? undefined);
+      try {
+        await this.authService.sendVerificationEmail(data.id, data.email, data.name);
+      } catch (err) {
+        logger.warn({ err, userId: data.id, email: data.email }, 'Failed to send verification email after registration');
+      }
       success(res, data, undefined, 201);
     } catch (err) {
       next(err);

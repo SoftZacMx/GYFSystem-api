@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { StorageService } from './StorageService';
+import { StorageService } from '@/services/StorageService';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 describe('StorageService', () => {
