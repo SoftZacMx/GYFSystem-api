@@ -20,4 +20,12 @@ export function registerAuthRoutes(app: Express, authController: AuthController)
   app.get('/auth/me', authMiddleware, (req: Request, res: Response) => {
     authController.me(req, res);
   });
+
+  app.post('/auth/forgot-password', (req: Request, res: Response, next: NextFunction) => {
+    authController.forgotPassword(req, res, next).catch(next);
+  });
+
+  app.post('/auth/reset-password', (req: Request, res: Response, next: NextFunction) => {
+    authController.resetPassword(req, res, next).catch(next);
+  });
 }

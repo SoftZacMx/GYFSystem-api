@@ -5,7 +5,16 @@ export {
   type PaginationQueryInput,
 } from './pagination';
 
-export { loginBodySchema, verifyAccountQuerySchema, type LoginBody, type VerifyAccountQuery } from './auth';
+export {
+  loginBodySchema,
+  verifyAccountQuerySchema,
+  forgotPasswordBodySchema,
+  resetPasswordBodySchema,
+  type LoginBody,
+  type VerifyAccountQuery,
+  type ForgotPasswordBody,
+  type ResetPasswordBody,
+} from './auth';
 
 export {
   createUserBodySchema,

@@ -22,7 +22,7 @@ const envSchema = z
 
   SIGNATURE_PRIVATE_KEY_PATH: z.string().default('./keys/private.pem'),
   SIGNATURE_PUBLIC_KEY_PATH: z.string().default('./keys/public.pem'),
-  APP_URL: z.string().default('http://localhost:3000'),
+  APP_URL: z.string().default('http://localhost:5173'),
 
   SMTP_HOST: z.string().default('localhost'),
   SMTP_PORT: z.coerce.number().default(587),
