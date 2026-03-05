@@ -10,6 +10,11 @@ import {
 
 export function registerCompanyRoutes(app: Express, controller: CompanyController): void {
   app.get(
+    '/theme',
+    (req: Request, res: Response, next: NextFunction) => controller.getTheme(req, res, next).catch(next)
+  );
+
+  app.get(
     '/company',
     authMiddleware,
     validateQuery(companyIdQuerySchema),
