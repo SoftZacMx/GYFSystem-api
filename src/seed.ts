@@ -10,7 +10,7 @@ import { ParentStudent } from './entities/ParentStudent';
 import { DocumentCategory } from './entities/DocumentCategory';
 
 const BCRYPT_ROUNDS = 10;
-
+   //changes
 async function seed(): Promise<void> {
   await appDataSource.initialize();
   logger.info('Database connected — starting seed');
