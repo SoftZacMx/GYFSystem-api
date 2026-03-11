@@ -2,7 +2,13 @@ import bcrypt from 'bcrypt';
 import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
 import type { AuditService } from './AuditService';
 import type { MailService } from '../mail/MailService';
-import { signAccessToken, signVerificationToken, verifyVerificationToken } from '../config/jwt';
+import {
+  signAccessToken,
+  signVerificationToken,
+  verifyVerificationToken,
+  signPasswordResetToken,
+  verifyPasswordResetToken,
+} from '../config/jwt';
 import { createAppError } from '../middlewares/global-error-handler';
 import { env } from '../config/env';
 
@@ -19,6 +25,8 @@ export interface LoginResult {
 }
 
 const VERIFICATION_LINK_GENERIC_ERROR = 'Invalid or expired verification link';
+const PASSWORD_RESET_GENERIC_ERROR = 'Invalid or expired reset link';
+const BCRYPT_ROUNDS = 10;
 
 export class AuthService {
   constructor(
@@ -113,5 +121,48 @@ export class AuthService {
     } catch {
       // User is already activated; log is handled in MailService. Still return success.
     }
+  }
+
+  /**
+   * If the email exists, sends a password reset link. Always returns success with a generic message
+   * to avoid user enumeration.
+   */
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      return;
+    }
+    const token = signPasswordResetToken(user.id, user.email);
+    const resetUrl = `${env.APP_URL}/auth/reset-password?token=${encodeURIComponent(token)}`;
+    try {
+      await this.mailService.sendPasswordResetEmail(user.email, {
+        recipientName: user.name,
+        resetUrl,
+      });
+    } catch {
+      // Do not reveal failure; caller will return generic success message.
+    }
+  }
+
+  /**
+   * Verifies the token, finds the user, and updates the password. Throws a generic error
+   * if token is invalid or expired.
+   */
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    let payload: { userId: number; email: string };
+    try {
+      payload = verifyPasswordResetToken(token);
+    } catch {
+      throw createAppError(PASSWORD_RESET_GENERIC_ERROR, 'BAD_REQUEST');
+    }
+    const user = await this.userRepository.findById(payload.userId);
+    if (!user || user.email !== payload.email) {
+      throw createAppError(PASSWORD_RESET_GENERIC_ERROR, 'BAD_REQUEST');
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await this.userRepository.save({
+      id: user.id,
+      password: hashedPassword,
+    });
   }
 }

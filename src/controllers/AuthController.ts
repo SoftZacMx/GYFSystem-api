@@ -1,7 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { AuthService } from '../services/AuthService';
 import { success } from '../views';
-import { loginBodySchema } from '../validators';
+import {
+  loginBodySchema,
+  forgotPasswordBodySchema,
+  resetPasswordBodySchema,
+} from '../validators';
 import type { VerifyAccountQuery } from '../validators';
 
 export class AuthController {
@@ -49,6 +53,39 @@ export class AuthController {
     try {
       await this.authService.verifyAccount(query.token);
       success(res, { message: 'Account verified successfully' }, undefined, 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const parsed = forgotPasswordBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(parsed.error);
+      return;
+    }
+    try {
+      await this.authService.forgotPassword(parsed.data.email);
+      success(
+        res,
+        { message: 'If an account exists with this email, you will receive a reset link.' },
+        undefined,
+        200
+      );
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const parsed = resetPasswordBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(parsed.error);
+      return;
+    }
+    try {
+      await this.authService.resetPassword(parsed.data.token, parsed.data.newPassword);
+      success(res, { message: 'Password has been reset successfully.' }, undefined, 200);
     } catch (err) {
       next(err);
     }

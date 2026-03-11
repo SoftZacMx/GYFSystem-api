@@ -23,6 +23,9 @@ export class Company {
   @Column({ type: 'varchar', length: 50, nullable: true })
   timezone: string | null;
 
+  @Column({ name: 'theme_config', type: 'json', nullable: true })
+  themeConfig: { primaryColor?: string; accentColor?: string } | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

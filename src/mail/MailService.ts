@@ -13,6 +13,10 @@ import {
   accountActivatedEmailHtml,
   accountActivatedEmailText,
   type AccountActivatedEmailData,
+  passwordResetEmailSubject,
+  passwordResetEmailHtml,
+  passwordResetEmailText,
+  type PasswordResetEmailData,
 } from './templates';
 
 export interface MailConfig {
@@ -105,6 +109,29 @@ export class MailService {
       );
     } catch (err) {
       logger.error({ err, to, subject }, 'Failed to send account activated email');
+      throw err;
+    }
+  }
+
+  async sendPasswordResetEmail(to: string, data: PasswordResetEmailData): Promise<void> {
+    const subject = passwordResetEmailSubject(data);
+    const html = passwordResetEmailHtml(data);
+    const text = passwordResetEmailText(data);
+    logger.info({ to, subject }, 'Sending password reset email');
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.from,
+        to,
+        subject,
+        html,
+        text,
+      });
+      logger.info(
+        { messageId: info.messageId, to, subject, accepted: info.accepted, rejected: info.rejected },
+        'Password reset email sent successfully',
+      );
+    } catch (err) {
+      logger.error({ err, to, subject }, 'Failed to send password reset email');
       throw err;
     }
   }
