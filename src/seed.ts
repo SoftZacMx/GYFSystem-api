@@ -36,6 +36,7 @@ async function seed(): Promise<void> {
   // ── Users ──
   const userRepo = appDataSource.getRepository(User);
   const password = await bcrypt.hash('password123', BCRYPT_ROUNDS);
+  const verifiedAt = new Date();
 
   const users = await userRepo.save([
     {
@@ -45,6 +46,8 @@ async function seed(): Promise<void> {
       userTypeId: userTypes[0].id, // Administrador
       roleId: roles[0].id,         // admin
       status: 'active',
+      isAccountActivated: true,
+      emailVerifiedAt: verifiedAt,
     },
     {
       name: 'María García',
@@ -53,6 +56,8 @@ async function seed(): Promise<void> {
       userTypeId: userTypes[1].id, // Docente
       roleId: roles[1].id,         // editor
       status: 'active',
+      isAccountActivated: true,
+      emailVerifiedAt: verifiedAt,
     },
     {
       name: 'Carlos López',
@@ -61,6 +66,8 @@ async function seed(): Promise<void> {
       userTypeId: userTypes[2].id, // Padre de familia
       roleId: roles[2].id,         // viewer
       status: 'active',
+      isAccountActivated: true,
+      emailVerifiedAt: verifiedAt,
     },
     {
       name: 'Ana Martínez',
@@ -69,6 +76,8 @@ async function seed(): Promise<void> {
       userTypeId: userTypes[2].id, // Padre de familia
       roleId: roles[2].id,         // viewer
       status: 'active',
+      isAccountActivated: true,
+      emailVerifiedAt: verifiedAt,
     },
   ]);
   logger.info(`Seeded ${users.length} users`);
