@@ -35,13 +35,15 @@ export class AllForeignKeysCascade1740006000000 implements MigrationInterface {
     const dbName = queryRunner.connection.options.database as string;
 
     for (const fk of FKS) {
-      const [row] = await queryRunner.query<Record<string, string>[]>(
+      const result = await queryRunner.query(
         `SELECT CONSTRAINT_NAME
          FROM information_schema.KEY_COLUMN_USAGE
          WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?
            AND REFERENCED_TABLE_NAME = ? AND REFERENCED_COLUMN_NAME = ?`,
         [dbName, fk.table, fk.column, fk.referencedTable, fk.referencedColumn],
       );
+      const rows = result as unknown as Record<string, string>[];
+      const row = rows[0];
       const currentName = row ? (row.CONSTRAINT_NAME ?? row.constraint_name) : null;
       if (!currentName) {
         throw new Error(`Could not find FK ${fk.table}.${fk.column} -> ${fk.referencedTable}.${fk.referencedColumn}`);

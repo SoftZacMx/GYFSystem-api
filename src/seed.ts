@@ -11,100 +11,161 @@ import { DocumentCategory } from './entities/DocumentCategory';
 
 const BCRYPT_ROUNDS = 10;
 
+async function upsertUserType(repo: ReturnType<typeof appDataSource.getRepository<UserType>>, name: string): Promise<UserType> {
+  const existing = await repo.findOne({ where: { name } });
+  if (existing) {
+    return existing;
+  }
+  return repo.save(repo.create({ name }));
+}
+
+async function upsertRole(repo: ReturnType<typeof appDataSource.getRepository<Role>>, name: string): Promise<Role> {
+  const existing = await repo.findOne({ where: { name } });
+  if (existing) {
+    return existing;
+  }
+  return repo.save(repo.create({ name }));
+}
+
+async function upsertUser(
+  repo: ReturnType<typeof appDataSource.getRepository<User>>,
+  data: { name: string; email: string; password: string; userTypeId: number; roleId: number; status: string; isAccountActivated: boolean; emailVerifiedAt: Date },
+): Promise<User> {
+  const existing = await repo.findOne({ where: { email: data.email } });
+  if (existing) {
+    existing.name = data.name;
+    existing.password = data.password;
+    existing.userTypeId = data.userTypeId;
+    existing.roleId = data.roleId;
+    existing.status = data.status;
+    existing.isAccountActivated = data.isAccountActivated;
+    existing.emailVerifiedAt = data.emailVerifiedAt;
+    return repo.save(existing);
+  }
+  return repo.save(repo.create(data));
+}
+
+async function upsertStudent(
+  repo: ReturnType<typeof appDataSource.getRepository<Student>>,
+  data: { fullName: string; curp: string; grade: string; status: string },
+): Promise<Student> {
+  const existing = await repo.findOne({ where: { curp: data.curp } });
+  if (existing) {
+    existing.fullName = data.fullName;
+    existing.grade = data.grade;
+    existing.status = data.status;
+    return repo.save(existing);
+  }
+  return repo.save(repo.create(data));
+}
+
+async function upsertParentStudent(
+  repo: ReturnType<typeof appDataSource.getRepository<ParentStudent>>,
+  userId: number,
+  studentId: number,
+): Promise<ParentStudent> {
+  const existing = await repo.findOne({ where: { userId, studentId } });
+  if (existing) {
+    return existing;
+  }
+  return repo.save(repo.create({ userId, studentId }));
+}
+
+async function upsertDocumentCategory(
+  repo: ReturnType<typeof appDataSource.getRepository<DocumentCategory>>,
+  name: string,
+  description: string,
+): Promise<DocumentCategory> {
+  const existing = await repo.findOne({ where: { name } });
+  if (existing) {
+    existing.description = description;
+    return repo.save(existing);
+  }
+  return repo.save(repo.create({ name, description }));
+}
+
 async function seed(): Promise<void> {
   await appDataSource.initialize();
   logger.info('Database connected — starting seed');
 
   // ── User Types ──
   const userTypeRepo = appDataSource.getRepository(UserType);
-  const userTypes = await userTypeRepo.save([
-    { name: 'Administrador' },
-    { name: 'Docente' },
-    { name: 'Padre de familia' },
-  ]);
+  const userTypes = [
+    await upsertUserType(userTypeRepo, 'Administrador'),
+    await upsertUserType(userTypeRepo, 'Docente'),
+    await upsertUserType(userTypeRepo, 'Padre de familia'),
+  ];
   logger.info(`Seeded ${userTypes.length} user types`);
 
   // ── Roles ──
   const roleRepo = appDataSource.getRepository(Role);
-  const roles = await roleRepo.save([
-    { name: 'admin' },
-    { name: 'editor' },
-    { name: 'viewer' },
-  ]);
+  const roles = [
+    await upsertRole(roleRepo, 'admin'),
+    await upsertRole(roleRepo, 'editor'),
+    await upsertRole(roleRepo, 'viewer'),
+  ];
   logger.info(`Seeded ${roles.length} roles`);
 
   // ── Users ──
   const userRepo = appDataSource.getRepository(User);
   const password = await bcrypt.hash('password123', BCRYPT_ROUNDS);
+  const verifiedAt = new Date();
 
-  const users = await userRepo.save([
-    {
-      name: 'Admin Principal',
-      email: 'admin@filesmanager.com',
-      password,
-      userTypeId: userTypes[0].id, // Administrador
-      roleId: roles[0].id,         // admin
-      status: 'active',
-    },
-    {
-      name: 'María García',
-      email: 'maria@filesmanager.com',
-      password,
-      userTypeId: userTypes[1].id, // Docente
-      roleId: roles[1].id,         // editor
-      status: 'active',
-    },
-    {
-      name: 'Carlos López',
-      email: 'carlos@filesmanager.com',
-      password,
-      userTypeId: userTypes[2].id, // Padre de familia
-      roleId: roles[2].id,         // viewer
-      status: 'active',
-    },
-    {
-      name: 'Ana Martínez',
-      email: 'ana@filesmanager.com',
-      password,
-      userTypeId: userTypes[2].id, // Padre de familia
-      roleId: roles[2].id,         // viewer
-      status: 'active',
-    },
-  ]);
+  const userPayloads = [
+    { name: 'Admin Principal', email: 'admin@filesmanager.com', userTypeId: userTypes[0].id, roleId: roles[0].id },
+    { name: 'María García', email: 'maria@filesmanager.com', userTypeId: userTypes[1].id, roleId: roles[1].id },
+    { name: 'Carlos López', email: 'carlos@filesmanager.com', userTypeId: userTypes[2].id, roleId: roles[2].id },
+    { name: 'Ana Martínez', email: 'ana@filesmanager.com', userTypeId: userTypes[2].id, roleId: roles[2].id },
+  ];
+
+  const users = await Promise.all(
+    userPayloads.map((p) =>
+      upsertUser(userRepo, {
+        ...p,
+        password,
+        status: 'active',
+        isAccountActivated: true,
+        emailVerifiedAt: verifiedAt,
+      }),
+    ),
+  );
   logger.info(`Seeded ${users.length} users`);
 
   // ── Students ──
   const studentRepo = appDataSource.getRepository(Student);
-  const students = await studentRepo.save([
+  const studentPayloads = [
     { fullName: 'Pedro López García', curp: 'LOGP100515HDFRRD01', grade: '3A', status: 'active' },
     { fullName: 'Sofía López García', curp: 'LOGS120320MDFRRF02', grade: '1B', status: 'active' },
     { fullName: 'Diego Martínez Ruiz', curp: 'MARD110810HDFRGG03', grade: '2A', status: 'active' },
     { fullName: 'Valentina Martínez Ruiz', curp: 'MARV090225MDFRRL04', grade: '4B', status: 'active' },
     { fullName: 'Emiliano Ramírez Soto', curp: 'RASE130705HDFRMT05', grade: '1A', status: 'inactive' },
-  ]);
+  ];
+  const students = await Promise.all(studentPayloads.map((p) => upsertStudent(studentRepo, p)));
   logger.info(`Seeded ${students.length} students`);
 
   // ── Parent-Student links ──
   const psRepo = appDataSource.getRepository(ParentStudent);
-  const links = await psRepo.save([
-    { userId: users[2].id, studentId: students[0].id }, // Carlos → Pedro
-    { userId: users[2].id, studentId: students[1].id }, // Carlos → Sofía
-    { userId: users[3].id, studentId: students[2].id }, // Ana → Diego
-    { userId: users[3].id, studentId: students[3].id }, // Ana → Valentina
-  ]);
-  logger.info(`Seeded ${links.length} parent-student links`);
+  const linkPairs: [number, number][] = [
+    [users[2].id, students[0].id], // Carlos → Pedro
+    [users[2].id, students[1].id], // Carlos → Sofía
+    [users[3].id, students[2].id], // Ana → Diego
+    [users[3].id, students[3].id], // Ana → Valentina
+  ];
+  await Promise.all(linkPairs.map(([userId, studentId]) => upsertParentStudent(psRepo, userId, studentId)));
+  logger.info(`Seeded ${linkPairs.length} parent-student links`);
 
   // ── Document Categories ──
   const categoryRepo = appDataSource.getRepository(DocumentCategory);
-  const categories = await categoryRepo.save([
-    { name: 'Acta de nacimiento', description: 'Acta de nacimiento del estudiante' },
-    { name: 'CURP', description: 'Constancia de CURP' },
-    { name: 'Boleta de calificaciones', description: 'Boleta del ciclo escolar' },
-    { name: 'Constancia médica', description: 'Certificado médico o cartilla de vacunación' },
-    { name: 'Comprobante de domicilio', description: 'Recibo de luz, agua o teléfono reciente' },
-    { name: 'Identificación del tutor', description: 'INE o pasaporte del padre/tutor' },
-  ]);
-  logger.info(`Seeded ${categories.length} document categories`);
+  const categoryPayloads: [string, string][] = [
+    ['Acta de nacimiento', 'Acta de nacimiento del estudiante'],
+    ['CURP', 'Constancia de CURP'],
+    ['Boleta de calificaciones', 'Boleta del ciclo escolar'],
+    ['Constancia médica', 'Certificado médico o cartilla de vacunación'],
+    ['Comprobante de domicilio', 'Recibo de luz, agua o teléfono reciente'],
+    ['Identificación del tutor', 'INE o pasaporte del padre/tutor'],
+  ];
+  await Promise.all(categoryPayloads.map(([name, desc]) => upsertDocumentCategory(categoryRepo, name, desc)));
+  logger.info(`Seeded ${categoryPayloads.length} document categories`);
 
   logger.info('Seed completed successfully');
   await appDataSource.destroy();
