@@ -24,16 +24,10 @@ const envSchema = z
   SIGNATURE_PUBLIC_KEY_PATH: z.string().default('./keys/public.pem'),
   APP_URL: z.string().default('http://localhost:5173'),
 
-  SMTP_HOST: z.string().default('localhost'),
-  SMTP_PORT: z.coerce.number().default(587),
-  SMTP_USER: z.string().default(''),
-  SMTP_PASS: z.string().default(''),
+  /** Remitente por defecto (o el de Company en BD). Debe ser identidad verificada en SES. */
   SMTP_FROM: z.string().default('Files Manager <noreply@filesmanager.local>'),
 
-  /** Si está definido, se usa Resend API (HTTPS) en lugar de SMTP. Obtener en resend.com → API Keys. Funciona en Railway. */
-  RESEND_API_KEY: z.string().optional(),
-
-  /** Si true, se usa AWS SES para enviar correos. Usa las mismas credenciales que S3 (S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY). El usuario IAM debe tener permiso ses:SendEmail. */
+  /** El envío de correo es solo por AWS SES. Si true, se crea el cliente SES con las credenciales S3 (S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY). El usuario IAM debe tener permiso ses:SendEmail. */
   AWS_SES_ENABLED: z.coerce.boolean().default(false),
   /** Región de SES (ej. us-east-1). Si no se define, se usa S3_REGION. */
   AWS_SES_REGION: z.string().optional(),

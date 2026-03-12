@@ -86,13 +86,8 @@ app.get('/readiness', async (_req: Request, res: Response) => {
 });
 
 const mailService = new MailService({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  user: env.SMTP_USER,
-  pass: env.SMTP_PASS,
   from: env.SMTP_FROM,
-  resendApiKey: env.RESEND_API_KEY,
-  sesClient: sesClient ?? undefined,
+  sesClient,
   sesRegion,
 });
 
