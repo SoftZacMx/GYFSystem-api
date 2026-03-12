@@ -68,7 +68,7 @@ export class MailService {
     return { messageId: info.messageId, accepted: [to], rejected: [] };
   }
 
-  async sendNotificationEmail(to: string, data: NotificationEmailData, _smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
+  async sendNotificationEmail(to: string, data: NotificationEmailData, _smtpConfig?: unknown, companyFrom?: string | null): Promise<void> {
     const subject = notificationEmailSubject(data);
     const html = notificationEmailHtml(data);
     const text = notificationEmailText(data);
@@ -89,7 +89,7 @@ export class MailService {
     }
   }
 
-  async sendVerificationEmail(to: string, data: VerificationEmailData, _smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
+  async sendVerificationEmail(to: string, data: VerificationEmailData, _smtpConfig?: unknown, companyFrom?: string | null): Promise<void> {
     const subject = verificationEmailSubject(data);
     const html = verificationEmailHtml(data);
     const text = verificationEmailText(data);
@@ -109,7 +109,7 @@ export class MailService {
     }
   }
 
-  async sendAccountActivatedEmail(to: string, data: AccountActivatedEmailData, _smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
+  async sendAccountActivatedEmail(to: string, data: AccountActivatedEmailData, _smtpConfig?: unknown, companyFrom?: string | null): Promise<void> {
     const subject = accountActivatedEmailSubject(data);
     const html = accountActivatedEmailHtml(data);
     const text = accountActivatedEmailText(data);
@@ -129,7 +129,7 @@ export class MailService {
     }
   }
 
-  async sendPasswordResetEmail(to: string, data: PasswordResetEmailData, _smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
+  async sendPasswordResetEmail(to: string, data: PasswordResetEmailData, _smtpConfig?: unknown, companyFrom?: string | null): Promise<void> {
     const subject = passwordResetEmailSubject(data);
     const html = passwordResetEmailHtml(data);
     const text = passwordResetEmailText(data);
