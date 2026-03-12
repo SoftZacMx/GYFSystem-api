@@ -42,7 +42,7 @@ export class AllForeignKeysCascade1740006000000 implements MigrationInterface {
            AND REFERENCED_TABLE_NAME = ? AND REFERENCED_COLUMN_NAME = ?`,
         [dbName, fk.table, fk.column, fk.referencedTable, fk.referencedColumn],
       );
-      const rows = result as Record<string, string>[];
+      const rows = result as unknown as Record<string, string>[];
       const row = rows[0];
       const currentName = row ? (row.CONSTRAINT_NAME ?? row.constraint_name) : null;
       if (!currentName) {

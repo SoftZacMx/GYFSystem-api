@@ -16,7 +16,7 @@ export class ParentStudentUserCascade1740005000000 implements MigrationInterface
          AND COLUMN_NAME = 'user_id' AND REFERENCED_TABLE_NAME = 'user'`,
       [dbName],
     );
-    const rows = result as Record<string, string>[];
+    const rows = result as unknown as Record<string, string>[];
     const row = rows[0];
     const fkName = row ? (row.CONSTRAINT_NAME ?? row.constraint_name) : null;
     if (!fkName) {
