@@ -66,13 +66,13 @@ export class NotificationService {
 
     const dto = toDto(notification);
 
-    this.companyService.getSmtpConfig()
-      .then((smtpConfig) => this.mailService.sendNotificationEmail(user.email, {
+    Promise.all([this.companyService.getSmtpConfig(), this.companyService.getCompanyMailFrom()])
+      .then(([smtpConfig, companyFrom]) => this.mailService.sendNotificationEmail(user.email, {
         recipientName: user.name,
         message: dto.message,
         type: dto.type,
         createdAt: dto.createdAt,
-      }, smtpConfig ?? undefined))
+      }, smtpConfig ?? undefined, companyFrom ?? undefined))
       .catch((err) => {
         logger.error({ err, userId: user.id, email: user.email }, 'Unhandled error sending notification email');
       });

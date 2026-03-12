@@ -83,11 +83,11 @@ export class AuthService {
   async sendVerificationEmail(userId: number, email: string, recipientName: string): Promise<void> {
     const token = signVerificationToken(userId, email);
     const verificationUrl = `${env.APP_URL}/auth/account/verify?token=${encodeURIComponent(token)}`;
-    const smtpConfig = await this.companyService.getSmtpConfig();
+    const [smtpConfig, companyFrom] = await Promise.all([this.companyService.getSmtpConfig(), this.companyService.getCompanyMailFrom()]);
     await this.mailService.sendVerificationEmail(email, {
       recipientName,
       verificationUrl,
-    }, smtpConfig ?? undefined);
+    }, smtpConfig ?? undefined, companyFrom ?? undefined);
   }
 
   /**
@@ -118,10 +118,10 @@ export class AuthService {
     });
 
     try {
-      const smtpConfig = await this.companyService.getSmtpConfig();
+      const [smtpConfig, companyFrom] = await Promise.all([this.companyService.getSmtpConfig(), this.companyService.getCompanyMailFrom()]);
       await this.mailService.sendAccountActivatedEmail(user.email, {
         recipientName: user.name,
-      }, smtpConfig ?? undefined);
+      }, smtpConfig ?? undefined, companyFrom ?? undefined);
     } catch {
       // User is already activated; log is handled in MailService. Still return success.
     }
@@ -139,11 +139,11 @@ export class AuthService {
     const token = signPasswordResetToken(user.id, user.email);
     const resetUrl = `${env.APP_URL}/auth/reset-password?token=${encodeURIComponent(token)}`;
     try {
-      const smtpConfig = await this.companyService.getSmtpConfig();
+      const [smtpConfig, companyFrom] = await Promise.all([this.companyService.getSmtpConfig(), this.companyService.getCompanyMailFrom()]);
       await this.mailService.sendPasswordResetEmail(user.email, {
         recipientName: user.name,
         resetUrl,
-      }, smtpConfig ?? undefined);
+      }, smtpConfig ?? undefined, companyFrom ?? undefined);
     } catch {
       // Do not reveal failure; caller will return generic success message.
     }

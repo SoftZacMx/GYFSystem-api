@@ -69,7 +69,7 @@ export class EventService {
 
   private async notifyAllUsers(event: EventDto): Promise<void> {
     const users = await this.userRepository.findAll();
-    const smtpConfig = await this.companyService.getSmtpConfig();
+    const [smtpConfig, companyFrom] = await Promise.all([this.companyService.getSmtpConfig(), this.companyService.getCompanyMailFrom()]);
     const eventDateFormatted = event.eventDate.toLocaleDateString('es-MX', {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
     });
@@ -92,7 +92,7 @@ export class EventService {
           message,
           type: 'event',
           createdAt: notification.createdAt,
-        }, smtpConfig ?? undefined).catch((err) => {
+        }, smtpConfig ?? undefined, companyFrom ?? undefined).catch((err) => {
           logger.error({ err, userId: user.id, email: user.email }, 'Failed to send event email');
         });
       } catch (err) {

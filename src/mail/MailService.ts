@@ -101,11 +101,11 @@ export class MailService {
     return { messageId: info.messageId, accepted: info.accepted as string[], rejected: info.rejected as string[] };
   }
 
-  async sendNotificationEmail(to: string, data: NotificationEmailData, smtpConfig?: MailConfig | null): Promise<void> {
+  async sendNotificationEmail(to: string, data: NotificationEmailData, smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
     const subject = notificationEmailSubject(data);
     const html = notificationEmailHtml(data);
     const text = notificationEmailText(data);
-    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
+    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
 
     logger.info({ to, subject, type: data.type }, 'Attempting to send notification email…');
 
@@ -122,11 +122,11 @@ export class MailService {
     }
   }
 
-  async sendVerificationEmail(to: string, data: VerificationEmailData, smtpConfig?: MailConfig | null): Promise<void> {
+  async sendVerificationEmail(to: string, data: VerificationEmailData, smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
     const subject = verificationEmailSubject(data);
     const html = verificationEmailHtml(data);
     const text = verificationEmailText(data);
-    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
+    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending account verification email');
     try {
       const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
@@ -142,11 +142,11 @@ export class MailService {
     }
   }
 
-  async sendAccountActivatedEmail(to: string, data: AccountActivatedEmailData, smtpConfig?: MailConfig | null): Promise<void> {
+  async sendAccountActivatedEmail(to: string, data: AccountActivatedEmailData, smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
     const subject = accountActivatedEmailSubject(data);
     const html = accountActivatedEmailHtml(data);
     const text = accountActivatedEmailText(data);
-    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
+    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending account activated email');
     try {
       const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
@@ -162,11 +162,11 @@ export class MailService {
     }
   }
 
-  async sendPasswordResetEmail(to: string, data: PasswordResetEmailData, smtpConfig?: MailConfig | null): Promise<void> {
+  async sendPasswordResetEmail(to: string, data: PasswordResetEmailData, smtpConfig?: MailConfig | null, companyFrom?: string | null): Promise<void> {
     const subject = passwordResetEmailSubject(data);
     const html = passwordResetEmailHtml(data);
     const text = passwordResetEmailText(data);
-    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
+    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending password reset email');
     try {
       const info = await this.sendMail(to, from, subject, html, text, smtpConfig);

@@ -72,6 +72,15 @@ export class CompanyService {
   }
 
   /**
+   * Returns the "from" address from company (id 1) if set. Used when sending via Resend so the remitente
+   * configured in the frontend (BDD) is used instead of env default.
+   */
+  async getCompanyMailFrom(): Promise<string | null> {
+    const company = await this.companyRepository.findOne(1);
+    return company?.smtpFrom?.trim() || null;
+  }
+
+  /**
    * Returns SMTP config from company (id 1) for sending emails. If any required field is missing, returns null
    * (caller should fall back to env SMTP).
    */
