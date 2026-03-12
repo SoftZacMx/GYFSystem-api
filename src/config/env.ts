@@ -38,7 +38,7 @@ const envSchema = z
   .refine(
     (data) => data.NODE_ENV !== 'production' || data.JWT_SECRET.length >= 32,
     { message: 'JWT_SECRET must be at least 32 characters in production', path: ['JWT_SECRET'] }
-  );
+  );//
 
 const parsed = envSchema.safeParse(process.env);
 
