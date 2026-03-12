@@ -33,6 +33,11 @@ const envSchema = z
   /** Si está definido, se usa Resend API (HTTPS) en lugar de SMTP. Obtener en resend.com → API Keys. Funciona en Railway. */
   RESEND_API_KEY: z.string().optional(),
 
+  /** Si true, se usa AWS SES para enviar correos. Usa las mismas credenciales que S3 (S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY). El usuario IAM debe tener permiso ses:SendEmail. */
+  AWS_SES_ENABLED: z.coerce.boolean().default(false),
+  /** Región de SES (ej. us-east-1). Si no se define, se usa S3_REGION. */
+  AWS_SES_REGION: z.string().optional(),
+
   /** Clave para cifrar SMTP_PASS en company (mín. 32 caracteres en producción). */
   ENCRYPTION_KEY: z.string().default('dev-encryption-key-min-32-chars!!'),
   })

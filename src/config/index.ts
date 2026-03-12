@@ -7,3 +7,4 @@ export {
   type AccessTokenPayload,
 } from './jwt';
 export { s3Client, s3Bucket, createS3Client } from './s3';
+export { sesClient, sesRegion, createSESClient } from './ses';

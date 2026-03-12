@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
-import { env, logger, appDataSource, s3Client, s3Bucket } from './config';
+import { env, logger, appDataSource, s3Client, s3Bucket, sesClient, sesRegion } from './config';
 import { openApiDocument } from './config/openapi';
 import { requestLogger } from './middlewares/request-logger';
 import { createRepositoryFactory } from './repositories/repository-factory';
@@ -92,6 +92,8 @@ const mailService = new MailService({
   pass: env.SMTP_PASS,
   from: env.SMTP_FROM,
   resendApiKey: env.RESEND_API_KEY,
+  sesClient: sesClient ?? undefined,
+  sesRegion,
 });
 
 const { userRepository, userTypeRepository, roleRepository, studentRepository, parentStudentRepository, documentCategoryRepository, documentRepository, eventRepository, notificationRepository, auditLogRepository, companyRepository } = createRepositoryFactory(appDataSource);

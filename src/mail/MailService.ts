@@ -1,4 +1,5 @@
 import nodemailer, { type Transporter } from 'nodemailer';
+import { SendEmailCommand, type SESClient } from '@aws-sdk/client-ses';
 import { logger } from '../config';
 import {
   notificationEmailSubject,
@@ -29,16 +30,24 @@ export interface MailConfig {
   from: string;
   /** Si está definido, se envía por Resend API (HTTPS) en lugar de SMTP. */
   resendApiKey?: string;
+  /** Si está definido, se puede usar AWS SES (prioridad: Resend > SES > SMTP). */
+  sesClient?: SESClient | null;
+  /** Región de SES (solo tiene efecto si sesClient está definido). */
+  sesRegion?: string;
 }
 
 export class MailService {
   private transporter: Transporter;
   private from: string;
   private resendApiKey: string | undefined;
+  private sesClient: SESClient | null;
+  private sesRegion: string;
 
   constructor(config: MailConfig) {
     this.from = config.from;
     this.resendApiKey = config.resendApiKey;
+    this.sesClient = config.sesClient ?? null;
+    this.sesRegion = config.sesRegion ?? 'us-east-1';
     this.transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
@@ -71,6 +80,25 @@ export class MailService {
     return { messageId: body.id ?? '' };
   }
 
+  private async sendViaSES(to: string, from: string, subject: string, html: string, text: string): Promise<{ messageId: string }> {
+    if (!this.sesClient) {
+      throw new Error('SES client not configured');
+    }
+    const command = new SendEmailCommand({
+      Source: from,
+      Destination: { ToAddresses: [to] },
+      Message: {
+        Subject: { Data: subject, Charset: 'UTF-8' },
+        Body: {
+          Html: { Data: html, Charset: 'UTF-8' },
+          Text: { Data: text || html.replace(/<[^>]+>/g, ''), Charset: 'UTF-8' },
+        },
+      },
+    });
+    const result = await this.sesClient.send(command);
+    return { messageId: result.MessageId ?? '' };
+  }
+
   private getTransporter(smtpConfig?: MailConfig | null): { transporter: Transporter; from: string } {
     if (smtpConfig) {
       const transporter = nodemailer.createTransport({
@@ -96,6 +124,10 @@ export class MailService {
       const info = await this.sendViaResend(to, from, subject, html, text);
       return { messageId: info.messageId, accepted: [to], rejected: [] };
     }
+    if (this.sesClient) {
+      const info = await this.sendViaSES(to, from, subject, html, text);
+      return { messageId: info.messageId, accepted: [to], rejected: [] };
+    }
     const { transporter } = this.getTransporter(smtpConfig);
     const info = await transporter.sendMail({ from, to, subject, html, text });
     return { messageId: info.messageId, accepted: info.accepted as string[], rejected: info.rejected as string[] };
@@ -105,7 +137,7 @@ export class MailService {
     const subject = notificationEmailSubject(data);
     const html = notificationEmailHtml(data);
     const text = notificationEmailText(data);
-    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
+    const from = (this.resendApiKey || this.sesClient) ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
 
     logger.info({ to, subject, type: data.type }, 'Attempting to send notification email…');
 
@@ -126,7 +158,7 @@ export class MailService {
     const subject = verificationEmailSubject(data);
     const html = verificationEmailHtml(data);
     const text = verificationEmailText(data);
-    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
+    const from = (this.resendApiKey || this.sesClient) ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending account verification email');
     try {
       const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
@@ -146,7 +178,7 @@ export class MailService {
     const subject = accountActivatedEmailSubject(data);
     const html = accountActivatedEmailHtml(data);
     const text = accountActivatedEmailText(data);
-    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
+    const from = (this.resendApiKey || this.sesClient) ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending account activated email');
     try {
       const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
@@ -166,7 +198,7 @@ export class MailService {
     const subject = passwordResetEmailSubject(data);
     const html = passwordResetEmailHtml(data);
     const text = passwordResetEmailText(data);
-    const from = this.resendApiKey ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
+    const from = (this.resendApiKey || this.sesClient) ? (companyFrom ?? this.from) : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending password reset email');
     try {
       const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
@@ -185,6 +217,10 @@ export class MailService {
   async verify(): Promise<boolean> {
     if (this.resendApiKey) {
       logger.info('Resend API key configured (skip SMTP verify)');
+      return true;
+    }
+    if (this.sesClient) {
+      logger.info('AWS SES configured (skip SMTP verify)');
       return true;
     }
     try {
