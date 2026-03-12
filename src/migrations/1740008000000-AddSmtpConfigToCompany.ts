@@ -6,7 +6,7 @@ export class AddSmtpConfigToCompany1740008000000 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(
       'company',
-      new TableColumn({ name: 'smtp_host', type: 'varchar', length: 255, isNullable: true })
+      new TableColumn({ name: 'smtp_host', type: 'varchar', length: '255', isNullable: true })
     );
     await queryRunner.addColumn(
       'company',
