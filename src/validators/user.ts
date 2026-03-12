@@ -8,6 +8,7 @@ export const createUserBodySchema = z.object({
   userTypeId: z.coerce.number().int().positive('userTypeId must be a positive integer'),
   roleId: z.coerce.number().int().positive('roleId must be a positive integer'),
   status: z.string().min(1, 'status is required').max(50),
+  activateAccount: z.boolean().optional().default(false),
 });
 
 export const updateUserBodySchema = z.object({

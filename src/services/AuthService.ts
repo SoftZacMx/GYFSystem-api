@@ -91,6 +91,19 @@ export class AuthService {
   }
 
   /**
+   * Sends the "account activated" email to a user (e.g. when created with activateAccount: true).
+   * Does not throw on mail failure; caller may log.
+   */
+  async sendAccountActivatedEmailForUser(userId: number): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) return;
+    const [smtpConfig, companyFrom] = await Promise.all([this.companyService.getSmtpConfig(), this.companyService.getCompanyMailFrom()]);
+    await this.mailService.sendAccountActivatedEmail(user.email, {
+      recipientName: user.name,
+    }, smtpConfig ?? undefined, companyFrom ?? undefined);
+  }
+
+  /**
    * Verifies the token, ensures user exists and is not yet activated, then sets isAccountActivated and sends confirmation email.
    * Throws a generic error (no user enumeration) if token is invalid, user not found, or already activated.
    */

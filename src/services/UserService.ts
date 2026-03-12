@@ -42,6 +42,7 @@ export class UserService {
       throw createAppError('Email already registered', 'CONFLICT');
     }
     const hashedPassword = await bcrypt.hash(body.password, BCRYPT_ROUNDS);
+    const now = body.activateAccount === true ? new Date() : null;
     const user = await this.userRepository.save({
       name: body.name,
       email: body.email,
@@ -49,7 +50,8 @@ export class UserService {
       userTypeId: body.userTypeId,
       roleId: body.roleId,
       status: body.status,
-      isAccountActivated: false,
+      isAccountActivated: body.activateAccount === true,
+      ...(now && { emailVerifiedAt: now }),
     });
     this.auditService.log({ userId: performedBy, action: 'CREATE', entityType: 'user', entityId: user.id, ip });
     return toDto(user);

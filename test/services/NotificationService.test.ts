@@ -21,7 +21,10 @@ function notification(overrides: Record<string, unknown> = {}) {
 
 describe('NotificationService', () => {
   const mailService = { sendNotificationEmail: vi.fn().mockResolvedValue(undefined) } as unknown as MailService;
-  const companyService = { getSmtpConfig: vi.fn().mockResolvedValue(null) } as unknown as CompanyService;
+  const companyService = {
+    getSmtpConfig: vi.fn().mockResolvedValue(null),
+    getCompanyMailFrom: vi.fn().mockResolvedValue(null),
+  } as unknown as CompanyService;
 
   it('create saves and returns dto when user exists', async () => {
     const userRepo: IUserRepository = {

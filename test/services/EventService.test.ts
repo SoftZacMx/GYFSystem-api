@@ -22,7 +22,10 @@ function event(overrides: Record<string, unknown> = {}) {
 describe('EventService', () => {
   const auditService = { log: vi.fn().mockResolvedValue(undefined) } as unknown as AuditService;
   const mailService = { sendNotificationEmail: vi.fn() } as unknown as MailService;
-  const companyService = { getSmtpConfig: vi.fn().mockResolvedValue(null) } as unknown as CompanyService;
+  const companyService = {
+    getSmtpConfig: vi.fn().mockResolvedValue(null),
+    getCompanyMailFrom: vi.fn().mockResolvedValue(null),
+  } as unknown as CompanyService;
 
   it('create saves event and returns dto', async () => {
     const eventRepo: IEventRepository = {

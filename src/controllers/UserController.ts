@@ -21,10 +21,18 @@ export class UserController {
     try {
       const ip = req.ip ?? req.socket.remoteAddress;
       const data = await this.userService.create(parsed.data, req.user?.sub, ip ?? undefined);
-      try {
-        await this.authService.sendVerificationEmail(data.id, data.email, data.name);
-      } catch (err) {
-        logger.warn({ err, userId: data.id, email: data.email }, 'Failed to send verification email after registration');
+      if (!parsed.data.activateAccount) {
+        try {
+          await this.authService.sendVerificationEmail(data.id, data.email, data.name);
+        } catch (err) {
+          logger.warn({ err, userId: data.id, email: data.email }, 'Failed to send verification email after registration');
+        }
+      } else {
+        try {
+          await this.authService.sendAccountActivatedEmailForUser(data.id);
+        } catch (err) {
+          logger.warn({ err, userId: data.id, email: data.email }, 'Failed to send account activated email after registration');
+        }
       }
       success(res, data, undefined, 201);
     } catch (err) {
