@@ -29,6 +29,9 @@ const envSchema = z
   SMTP_USER: z.string().default(''),
   SMTP_PASS: z.string().default(''),
   SMTP_FROM: z.string().default('Files Manager <noreply@filesmanager.local>'),
+
+  /** Clave para cifrar SMTP_PASS en company (mín. 32 caracteres en producción). */
+  ENCRYPTION_KEY: z.string().default('dev-encryption-key-min-32-chars!!'),
   })
   .refine(
     (data) => data.NODE_ENV !== 'production' || data.JWT_SECRET.length >= 32,

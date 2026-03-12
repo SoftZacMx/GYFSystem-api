@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { AuthService } from '@/services/AuthService';
 import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
 import type { AuditService } from '@/services/AuditService';
+import type { CompanyService } from '@/services/CompanyService';
 import type { MailService } from '@/mail/MailService';
 
 vi.mock('bcrypt', () => ({ default: { compare: vi.fn() } }));
@@ -29,6 +30,7 @@ describe('AuthService', () => {
   let userRepository: IUserRepository;
   let auditService: AuditService;
   let mailService: MailService;
+  let companyService: CompanyService;
 
   beforeEach(() => {
     vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
@@ -45,13 +47,14 @@ describe('AuthService', () => {
       sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
       sendAccountActivatedEmail: vi.fn().mockResolvedValue(undefined),
     } as unknown as MailService;
+    companyService = { getSmtpConfig: vi.fn().mockResolvedValue(null) } as unknown as CompanyService;
   });
 
   it('returns token and user on valid login', async () => {
     const u = user();
     vi.mocked(userRepository.findByEmail).mockResolvedValue(u as any);
 
-    const service = new AuthService(userRepository, auditService, mailService);
+    const service = new AuthService(userRepository, auditService, mailService, companyService);
     const result = await service.login('test@example.com', 'password123');
 
     expect(result.token).toBe('fake-jwt-token');
@@ -72,7 +75,7 @@ describe('AuthService', () => {
   it('throws UNAUTHORIZED when user not found', async () => {
     vi.mocked(userRepository.findByEmail).mockResolvedValue(null);
 
-    const service = new AuthService(userRepository, auditService, mailService);
+    const service = new AuthService(userRepository, auditService, mailService, companyService);
     await expect(service.login('unknown@example.com', 'pass')).rejects.toMatchObject({
       message: 'Invalid email or password',
       code: 'UNAUTHORIZED',
@@ -83,7 +86,7 @@ describe('AuthService', () => {
     vi.mocked(userRepository.findByEmail).mockResolvedValue(user() as any);
     vi.mocked(bcrypt.compare).mockResolvedValue(false as never);
 
-    const service = new AuthService(userRepository, auditService, mailService);
+    const service = new AuthService(userRepository, auditService, mailService, companyService);
     await expect(service.login('test@example.com', 'wrong')).rejects.toMatchObject({
       message: 'Invalid email or password',
       code: 'UNAUTHORIZED',

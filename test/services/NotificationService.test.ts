@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { NotificationService } from '@/services/NotificationService';
 import type { INotificationRepository } from '@/repositories/interfaces/INotificationRepository';
 import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
+import type { CompanyService } from '@/services/CompanyService';
 import type { MailService } from '@/mail';
 
 function notification(overrides: Record<string, unknown> = {}) {
@@ -20,6 +21,7 @@ function notification(overrides: Record<string, unknown> = {}) {
 
 describe('NotificationService', () => {
   const mailService = { sendNotificationEmail: vi.fn().mockResolvedValue(undefined) } as unknown as MailService;
+  const companyService = { getSmtpConfig: vi.fn().mockResolvedValue(null) } as unknown as CompanyService;
 
   it('create saves and returns dto when user exists', async () => {
     const userRepo: IUserRepository = {
@@ -39,7 +41,7 @@ describe('NotificationService', () => {
       markAllAsReadByUser: vi.fn(),
       delete: vi.fn(),
     };
-    const service = new NotificationService(notificationRepo, userRepo, mailService);
+    const service = new NotificationService(notificationRepo, userRepo, mailService, companyService);
     const result = await service.create({
       userId: 1,
       message: 'Hello',
@@ -66,7 +68,7 @@ describe('NotificationService', () => {
       markAllAsReadByUser: vi.fn(),
       delete: vi.fn(),
     };
-    const service = new NotificationService(notificationRepo, userRepo, mailService);
+    const service = new NotificationService(notificationRepo, userRepo, mailService, companyService);
     await expect(
       service.create({ userId: 999, message: 'Hi', type: 'info' })
     ).rejects.toMatchObject({ message: 'Target user not found', code: 'NOT_FOUND' });
@@ -83,7 +85,7 @@ describe('NotificationService', () => {
       delete: vi.fn(),
     };
     const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
-    const service = new NotificationService(notificationRepo, userRepo as any, mailService);
+    const service = new NotificationService(notificationRepo, userRepo as any, mailService, companyService);
     const result = await service.findById(1);
     expect(result).toMatchObject({ id: 1, message: 'Hello' });
   });
@@ -99,7 +101,7 @@ describe('NotificationService', () => {
       delete: vi.fn(),
     };
     const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
-    const service = new NotificationService(notificationRepo, userRepo as any, mailService);
+    const service = new NotificationService(notificationRepo, userRepo as any, mailService, companyService);
     await expect(service.findById(999)).rejects.toMatchObject({
       message: 'Notification not found',
       code: 'NOT_FOUND',
@@ -117,7 +119,7 @@ describe('NotificationService', () => {
       delete: vi.fn(),
     };
     const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
-    const service = new NotificationService(notificationRepo, userRepo as any, mailService);
+    const service = new NotificationService(notificationRepo, userRepo as any, mailService, companyService);
     const result = await service.markAsRead(1);
     expect(result.isRead).toBe(true);
     expect(notificationRepo.markAsRead).toHaveBeenCalledWith(1);
@@ -134,7 +136,7 @@ describe('NotificationService', () => {
       delete: vi.fn(),
     };
     const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
-    const service = new NotificationService(notificationRepo, userRepo as any, mailService);
+    const service = new NotificationService(notificationRepo, userRepo as any, mailService, companyService);
     const result = await service.markAllAsReadByUser(1);
     expect(result).toEqual({ updated: 5 });
   });
@@ -150,7 +152,7 @@ describe('NotificationService', () => {
       delete: vi.fn(),
     };
     const userRepo = { findById: vi.fn(), findByEmail: vi.fn(), findAll: vi.fn(), count: vi.fn(), save: vi.fn(), delete: vi.fn() };
-    const service = new NotificationService(notificationRepo, userRepo as any, mailService);
+    const service = new NotificationService(notificationRepo, userRepo as any, mailService, companyService);
     await expect(service.delete(999)).rejects.toMatchObject({
       message: 'Notification not found',
       code: 'NOT_FOUND',

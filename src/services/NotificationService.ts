@@ -1,5 +1,6 @@
 import type { INotificationRepository } from '../repositories/interfaces/INotificationRepository';
 import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
+import type { CompanyService } from './CompanyService';
 import type { MailService } from '../mail';
 import type { CreateNotificationBody } from '../validators/notification';
 import { createAppError } from '../middlewares/global-error-handler';
@@ -46,6 +47,7 @@ export class NotificationService {
     private readonly notificationRepository: INotificationRepository,
     private readonly userRepository: IUserRepository,
     private readonly mailService: MailService,
+    private readonly companyService: CompanyService,
   ) {}
 
   async create(body: CreateNotificationBody): Promise<NotificationDto> {
@@ -64,14 +66,16 @@ export class NotificationService {
 
     const dto = toDto(notification);
 
-    this.mailService.sendNotificationEmail(user.email, {
-      recipientName: user.name,
-      message: dto.message,
-      type: dto.type,
-      createdAt: dto.createdAt,
-    }).catch((err) => {
-      logger.error({ err, userId: user.id, email: user.email }, 'Unhandled error sending notification email');
-    });
+    this.companyService.getSmtpConfig()
+      .then((smtpConfig) => this.mailService.sendNotificationEmail(user.email, {
+        recipientName: user.name,
+        message: dto.message,
+        type: dto.type,
+        createdAt: dto.createdAt,
+      }, smtpConfig ?? undefined))
+      .catch((err) => {
+        logger.error({ err, userId: user.id, email: user.email }, 'Unhandled error sending notification email');
+      });
 
     return dto;
   }

@@ -26,6 +26,21 @@ export class Company {
   @Column({ name: 'theme_config', type: 'json', nullable: true })
   themeConfig: { primaryColor?: string; accentColor?: string } | null;
 
+  @Column({ name: 'smtp_host', type: 'varchar', length: 255, nullable: true })
+  smtpHost: string | null;
+
+  @Column({ name: 'smtp_port', type: 'int', nullable: true })
+  smtpPort: number | null;
+
+  @Column({ name: 'smtp_user', type: 'varchar', length: 255, nullable: true })
+  smtpUser: string | null;
+
+  @Column({ name: 'smtp_pass', type: 'text', nullable: true })
+  smtpPass: string | null;
+
+  @Column({ name: 'smtp_from', type: 'varchar', length: 255, nullable: true })
+  smtpFrom: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

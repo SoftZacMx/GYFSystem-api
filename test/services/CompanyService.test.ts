@@ -85,14 +85,21 @@ describe('CompanyService', () => {
         email: 'new@co.com',
       });
       expect(result).toMatchObject({ id: 1, name: 'New', email: 'new@co.com' });
-      expect(repo.save).toHaveBeenCalledWith({
-        name: 'New',
-        email: 'new@co.com',
-        phone: null,
-        address: null,
-        logoUrl: null,
-        timezone: null,
-      });
+      expect(repo.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'New',
+          email: 'new@co.com',
+          phone: null,
+          address: null,
+          logoUrl: null,
+          timezone: null,
+          themeConfig: null,
+          smtpHost: null,
+          smtpPort: null,
+          smtpUser: null,
+          smtpFrom: null,
+        })
+      );
     });
   });
 });

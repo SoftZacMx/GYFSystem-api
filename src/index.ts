@@ -96,8 +96,9 @@ const mailService = new MailService({
 const { userRepository, userTypeRepository, roleRepository, studentRepository, parentStudentRepository, documentCategoryRepository, documentRepository, eventRepository, notificationRepository, auditLogRepository, companyRepository } = createRepositoryFactory(appDataSource);
 
 const auditService = new AuditService(auditLogRepository);
+const companyService = new CompanyService(companyRepository);
 
-const authService = new AuthService(userRepository, auditService, mailService);
+const authService = new AuthService(userRepository, auditService, mailService, companyService);
 const authController = new AuthController(authService);
 registerAuthRoutes(app, authController);
 
@@ -136,15 +137,14 @@ const documentService = new DocumentService(documentRepository, studentRepositor
 const documentController = new DocumentController(documentService, env.APP_URL, parentStudentService);
 registerDocumentRoutes(app, documentController);
 
-const eventService = new EventService(eventRepository, notificationRepository, userRepository, mailService, auditService);
+const eventService = new EventService(eventRepository, notificationRepository, userRepository, mailService, auditService, companyService);
 const eventController = new EventController(eventService);
 registerEventRoutes(app, eventController);
 
-const notificationService = new NotificationService(notificationRepository, userRepository, mailService);
+const notificationService = new NotificationService(notificationRepository, userRepository, mailService, companyService);
 const notificationController = new NotificationController(notificationService);
 registerNotificationRoutes(app, notificationController);
 
-const companyService = new CompanyService(companyRepository);
 const companyController = new CompanyController(companyService);
 registerCompanyRoutes(app, companyController);
 

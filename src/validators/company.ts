@@ -19,6 +19,11 @@ export const createCompanyBodySchema = z.object({
   logoUrl: z.string().url().max(500).nullable().optional(),
   timezone: z.string().max(50).nullable().optional(),
   themeConfig: themeConfigSchema,
+  smtpHost: z.string().max(255).nullable().optional(),
+  smtpPort: z.coerce.number().int().min(1).max(65535).nullable().optional(),
+  smtpUser: z.string().max(255).nullable().optional(),
+  smtpPass: z.string().max(500).nullable().optional(),
+  smtpFrom: z.string().max(255).nullable().optional(),
 });
 
 export type CreateCompanyBody = z.infer<typeof createCompanyBodySchema>;
@@ -31,6 +36,11 @@ export const updateCompanyBodySchema = z.object({
   logoUrl: z.string().url().max(500).nullable().optional(),
   timezone: z.string().max(50).nullable().optional(),
   themeConfig: themeConfigSchema,
+  smtpHost: z.string().max(255).nullable().optional(),
+  smtpPort: z.coerce.number().int().min(1).max(65535).nullable().optional(),
+  smtpUser: z.string().max(255).nullable().optional(),
+  smtpPass: z.string().max(500).nullable().optional(),
+  smtpFrom: z.string().max(255).nullable().optional(),
 });
 
 export type UpdateCompanyBody = z.infer<typeof updateCompanyBodySchema>;

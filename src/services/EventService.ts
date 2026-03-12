@@ -1,6 +1,7 @@
 import type { IEventRepository } from '../repositories/interfaces/IEventRepository';
 import type { INotificationRepository } from '../repositories/interfaces/INotificationRepository';
 import type { IUserRepository } from '../repositories/interfaces/IUserRepository';
+import type { CompanyService } from './CompanyService';
 import type { MailService } from '../mail';
 import type { AuditService } from './AuditService';
 import type { CreateEventBody, UpdateEventBody } from '../validators/event';
@@ -46,6 +47,7 @@ export class EventService {
     private readonly userRepository: IUserRepository,
     private readonly mailService: MailService,
     private readonly auditService: AuditService,
+    private readonly companyService: CompanyService,
   ) {}
 
   async create(body: CreateEventBody, createdBy: number, ip?: string): Promise<EventDto> {
@@ -67,6 +69,7 @@ export class EventService {
 
   private async notifyAllUsers(event: EventDto): Promise<void> {
     const users = await this.userRepository.findAll();
+    const smtpConfig = await this.companyService.getSmtpConfig();
     const eventDateFormatted = event.eventDate.toLocaleDateString('es-MX', {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
     });
@@ -89,7 +92,7 @@ export class EventService {
           message,
           type: 'event',
           createdAt: notification.createdAt,
-        }).catch((err) => {
+        }, smtpConfig ?? undefined).catch((err) => {
           logger.error({ err, userId: user.id, email: user.email }, 'Failed to send event email');
         });
       } catch (err) {

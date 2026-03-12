@@ -3,6 +3,7 @@ import { EventService } from '@/services/EventService';
 import type { IEventRepository } from '@/repositories/interfaces/IEventRepository';
 import type { INotificationRepository } from '@/repositories/interfaces/INotificationRepository';
 import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
+import type { CompanyService } from '@/services/CompanyService';
 import type { MailService } from '@/mail';
 import type { AuditService } from '@/services/AuditService';
 
@@ -21,6 +22,7 @@ function event(overrides: Record<string, unknown> = {}) {
 describe('EventService', () => {
   const auditService = { log: vi.fn().mockResolvedValue(undefined) } as unknown as AuditService;
   const mailService = { sendNotificationEmail: vi.fn() } as unknown as MailService;
+  const companyService = { getSmtpConfig: vi.fn().mockResolvedValue(null) } as unknown as CompanyService;
 
   it('create saves event and returns dto', async () => {
     const eventRepo: IEventRepository = {
@@ -52,7 +54,8 @@ describe('EventService', () => {
       notificationRepo,
       userRepo,
       mailService,
-      auditService
+      auditService,
+      companyService
     );
     const result = await service.create(
       { title: 'New', description: 'Desc', eventDate: new Date() },
@@ -79,7 +82,8 @@ describe('EventService', () => {
       notificationRepo as any,
       userRepo as any,
       mailService,
-      auditService
+      auditService,
+      companyService
     );
     const result = await service.findById(1);
     expect(result).toMatchObject({ id: 1, title: 'Meeting' });
@@ -100,7 +104,8 @@ describe('EventService', () => {
       notificationRepo as any,
       userRepo as any,
       mailService,
-      auditService
+      auditService,
+      companyService
     );
     await expect(service.findById(999)).rejects.toMatchObject({
       message: 'Event not found',
@@ -123,7 +128,8 @@ describe('EventService', () => {
       notificationRepo as any,
       userRepo as any,
       mailService,
-      auditService
+      auditService,
+      companyService
     );
     const result = await service.findAll({ page: 1, limit: 10, order: 'asc' });
     expect(result.data).toHaveLength(1);
@@ -145,7 +151,8 @@ describe('EventService', () => {
       notificationRepo as any,
       userRepo as any,
       mailService,
-      auditService
+      auditService,
+      companyService
     );
     await expect(service.update(999, { title: 'X' })).rejects.toMatchObject({
       message: 'Event not found',
@@ -168,7 +175,8 @@ describe('EventService', () => {
       notificationRepo as any,
       userRepo as any,
       mailService,
-      auditService
+      auditService,
+      companyService
     );
     await service.delete(1);
     expect(eventRepo.delete).toHaveBeenCalledWith(1);
