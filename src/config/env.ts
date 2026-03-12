@@ -27,9 +27,7 @@ const envSchema = z
   /** Remitente por defecto (o el de Company en BD). Debe ser identidad verificada en SES. */
   SMTP_FROM: z.string().default('Files Manager <noreply@filesmanager.local>'),
 
-  /** El envío de correo es solo por AWS SES. Si true, se crea el cliente SES con las credenciales S3 (S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY). El usuario IAM debe tener permiso ses:SendEmail. */
-  AWS_SES_ENABLED: z.coerce.boolean().default(false),
-  /** Región de SES (ej. us-east-1). Si no se define, se usa S3_REGION. */
+  /** Región de SES (ej. us-east-1). Si no se define, se usa S3_REGION. El correo se envía solo por AWS SES con las credenciales S3. */
   AWS_SES_REGION: z.string().optional(),
 
   /** Clave para cifrar SMTP_PASS en company (mín. 32 caracteres en producción). */
@@ -38,7 +36,7 @@ const envSchema = z
   .refine(
     (data) => data.NODE_ENV !== 'production' || data.JWT_SECRET.length >= 32,
     { message: 'JWT_SECRET must be at least 32 characters in production', path: ['JWT_SECRET'] }
-  );//
+  );
 
 const parsed = envSchema.safeParse(process.env);
 

@@ -19,12 +19,12 @@ import {
   type PasswordResetEmailData,
 } from './templates';
 
-const SES_NOT_CONFIGURED = 'El envío de correo es solo por AWS SES; configure AWS_SES_ENABLED=true y las credenciales S3 (IAM con permiso ses:SendEmail).';
+const SES_NOT_CONFIGURED = 'El envío de correo es solo por AWS SES; configure S3_ACCESS_KEY_ID y S3_SECRET_ACCESS_KEY (usuario IAM con permiso ses:SendEmail).';
 
 export interface MailConfig {
   /** Remitente por defecto (o el de Company en BD). Debe ser identidad verificada en SES. */
   from: string;
-  /** Cliente SES (creado cuando AWS_SES_ENABLED=true y hay S3_ACCESS_KEY_ID/S3_SECRET_ACCESS_KEY). */
+  /** Cliente SES (creado con S3_ACCESS_KEY_ID/S3_SECRET_ACCESS_KEY). El correo se envía solo por AWS SES. */
   sesClient: SESClient | null;
   /** Región de SES. */
   sesRegion: string;
@@ -154,7 +154,7 @@ export class MailService {
       logger.info('AWS SES configured');
       return true;
     }
-    logger.warn('AWS SES not configured; email sending will fail until AWS_SES_ENABLED and S3 credentials are set');
+    logger.warn('AWS SES not configured; email sending will fail until S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are set');
     return false;
   }
 }
