@@ -91,6 +91,7 @@ const mailService = new MailService({
   user: env.SMTP_USER,
   pass: env.SMTP_PASS,
   from: env.SMTP_FROM,
+  resendApiKey: env.RESEND_API_KEY,
 });
 
 const { userRepository, userTypeRepository, roleRepository, studentRepository, parentStudentRepository, documentCategoryRepository, documentRepository, eventRepository, notificationRepository, auditLogRepository, companyRepository } = createRepositoryFactory(appDataSource);

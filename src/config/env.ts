@@ -30,6 +30,9 @@ const envSchema = z
   SMTP_PASS: z.string().default(''),
   SMTP_FROM: z.string().default('Files Manager <noreply@filesmanager.local>'),
 
+  /** Si está definido, se usa Resend API (HTTPS) en lugar de SMTP. Obtener en resend.com → API Keys. Funciona en Railway. */
+  RESEND_API_KEY: z.string().optional(),
+
   /** Clave para cifrar SMTP_PASS en company (mín. 32 caracteres en producción). */
   ENCRYPTION_KEY: z.string().default('dev-encryption-key-min-32-chars!!'),
   })

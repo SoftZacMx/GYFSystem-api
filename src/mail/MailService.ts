@@ -19,20 +19,26 @@ import {
   type PasswordResetEmailData,
 } from './templates';
 
+const RESEND_API_URL = 'https://api.resend.com/emails';
+
 export interface MailConfig {
   host: string;
   port: number;
   user: string;
   pass: string;
   from: string;
+  /** Si está definido, se envía por Resend API (HTTPS) en lugar de SMTP. */
+  resendApiKey?: string;
 }
 
 export class MailService {
   private transporter: Transporter;
   private from: string;
+  private resendApiKey: string | undefined;
 
   constructor(config: MailConfig) {
     this.from = config.from;
+    this.resendApiKey = config.resendApiKey;
     this.transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
@@ -41,6 +47,28 @@ export class MailService {
         ? { user: config.user, pass: config.pass }
         : undefined,
     });
+  }
+
+  private async sendViaResend(to: string, from: string, subject: string, html: string, text: string): Promise<{ messageId: string }> {
+    const res = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject,
+        html,
+        text: text || undefined,
+      }),
+    });
+    const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
+    if (!res.ok) {
+      throw new Error(body.message ?? `Resend API ${res.status}: ${res.statusText}`);
+    }
+    return { messageId: body.id ?? '' };
   }
 
   private getTransporter(smtpConfig?: MailConfig | null): { transporter: Transporter; from: string } {
@@ -56,22 +84,33 @@ export class MailService {
     return { transporter: this.transporter, from: this.from };
   }
 
+  private async sendMail(
+    to: string,
+    from: string,
+    subject: string,
+    html: string,
+    text: string,
+    smtpConfig?: MailConfig | null
+  ): Promise<{ messageId?: string; accepted?: string[]; rejected?: string[] }> {
+    if (this.resendApiKey) {
+      const info = await this.sendViaResend(to, from, subject, html, text);
+      return { messageId: info.messageId, accepted: [to], rejected: [] };
+    }
+    const { transporter } = this.getTransporter(smtpConfig);
+    const info = await transporter.sendMail({ from, to, subject, html, text });
+    return { messageId: info.messageId, accepted: info.accepted as string[], rejected: info.rejected as string[] };
+  }
+
   async sendNotificationEmail(to: string, data: NotificationEmailData, smtpConfig?: MailConfig | null): Promise<void> {
     const subject = notificationEmailSubject(data);
     const html = notificationEmailHtml(data);
     const text = notificationEmailText(data);
-    const { transporter, from } = this.getTransporter(smtpConfig);
+    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
 
     logger.info({ to, subject, type: data.type }, 'Attempting to send notification email…');
 
     try {
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        text,
-      });
+      const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
       logger.info(
         { messageId: info.messageId, to, subject, accepted: info.accepted, rejected: info.rejected },
         'Notification email sent successfully',
@@ -87,16 +126,10 @@ export class MailService {
     const subject = verificationEmailSubject(data);
     const html = verificationEmailHtml(data);
     const text = verificationEmailText(data);
-    const { transporter, from } = this.getTransporter(smtpConfig);
+    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending account verification email');
     try {
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        text,
-      });
+      const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
       logger.info(
         { messageId: info.messageId, to, subject, accepted: info.accepted, rejected: info.rejected },
         'Verification email sent successfully',
@@ -113,16 +146,10 @@ export class MailService {
     const subject = accountActivatedEmailSubject(data);
     const html = accountActivatedEmailHtml(data);
     const text = accountActivatedEmailText(data);
-    const { transporter, from } = this.getTransporter(smtpConfig);
+    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending account activated email');
     try {
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        text,
-      });
+      const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
       logger.info(
         { messageId: info.messageId, to, subject, accepted: info.accepted, rejected: info.rejected },
         'Account activated email sent successfully',
@@ -139,16 +166,10 @@ export class MailService {
     const subject = passwordResetEmailSubject(data);
     const html = passwordResetEmailHtml(data);
     const text = passwordResetEmailText(data);
-    const { transporter, from } = this.getTransporter(smtpConfig);
+    const from = this.resendApiKey ? this.from : this.getTransporter(smtpConfig).from;
     logger.info({ to, subject }, 'Sending password reset email');
     try {
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        text,
-      });
+      const info = await this.sendMail(to, from, subject, html, text, smtpConfig);
       logger.info(
         { messageId: info.messageId, to, subject, accepted: info.accepted, rejected: info.rejected },
         'Password reset email sent successfully',
@@ -162,6 +183,10 @@ export class MailService {
   }
 
   async verify(): Promise<boolean> {
+    if (this.resendApiKey) {
+      logger.info('Resend API key configured (skip SMTP verify)');
+      return true;
+    }
     try {
       await this.transporter.verify();
       logger.info('SMTP connection verified');
